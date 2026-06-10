@@ -12,13 +12,20 @@ builder.WebHost.ConfigureKestrel(options =>
         var certPath = Environment.GetEnvironmentVariable("CERT_PATH");
         var certPass = Environment.GetEnvironmentVariable("CERT_PASS");
         
+        // --- DODATNI LOGOVI ZA DIJAGNOSTIKU ---
+        Console.WriteLine($"[DEBUG] Pokušavam učitati sertifikat sa putanje: '{certPath}'");
+        
         if (!string.IsNullOrEmpty(certPath) && File.Exists(certPath))
         {
             listenOptions.UseHttps(certPath, certPass);
+            Console.WriteLine($"[SUCCESS] HTTPS je uspješno konfigurisan!");
+        }
+        else
+        {
+            Console.WriteLine($"[ERROR] Sertifikat NIJE pronađen ili varijabla nije setovana! Provjeri: {certPath}");
         }
     });
 });
-
 builder.Services.AddControllersWithViews();
 builder.Services.AddDistributedMemoryCache();
 
