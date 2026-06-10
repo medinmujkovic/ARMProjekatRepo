@@ -1,32 +1,22 @@
-FROM ubuntu:22.04
+# 1. Faza za build aplikacije (koristi .NET SDK)
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /app
 
-# Izbjegavanje interaktivnih upita tokom instalacije paketa
-ENV DEBIAN_FRONTEND=noninteractive
+# Kopiranje projektnog fajla i povlačenje biblioteka
+COPY *.csproj ./
+RUN dotnet restore
 
-# 1. Instalacija Apache2 i SSL modula unutar Ubuntu baze
-RUN apt-get update && apt-get install -y \
-    apache2 \
-    && a2enmod ssl \
-    && a2enmod rewrite \
-    && rm -rf /var/lib/apt/lists/*
+# Kopiranje ostatka koda i objava (Publish) aplikacije
+COPY . ./
+RUN dotnet publish -c Release -o out
 
-# === OVDJE BRIŠEMO FABRIČKU STRANICU DA NE SMETA ===
-RUN rm -rf /var/www/html/*
+# 2. Faza za pokretanje (koristi manju, runtime sliku)
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+COPY --from=build /app/out .
 
-# 2. Kopiranje konfiguracije virtuelnog hosta (www) u Apache
-COPY www.conf /etc/apache2/sites-available/www.conf
+# Izlaganje porta na kojem .NET aplikacije obično slušaju (8080 za .NET 8)
+EXPOSE 8080
 
-# 3. Gašenje defaultne stranice i paljenje našeg virtuelnog hosta
-RUN a2dissite 000-default.conf && a2ensite www.conf
-
-# 4. Kopiranje cjelokupnog koda tvoje web aplikacije u Apache direktorij
-COPY . /var/www/html/
-
-# Osiguravamo da pocetna.html radi kao glavna stranica ako zatreba
-RUN cp /var/www/html/html/pocetna.html /var/www/html/index.html || true
-
-# Izlaganje portova 80 (HTTP) i 443 (HTTPS) kako traži zadatak
-EXPOSE 80 443
-
-# Pokretanje Apache servera u pozadini kontejnera
-CMD ["apache2ctl", "-D", "FOREGROUND"]
+# Pokretanje aplikacije (zamijeni sa tačnim nazivom tvog .csproj ako treba)
+ENTRYPOINT ["dotnet", "SudskiSistemApp.dll"]
