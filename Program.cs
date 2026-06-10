@@ -4,18 +4,17 @@ using SudskiSistemApp.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // --- HTTPS KONFIGURACIJA ---
-// Čita iz appsettings.json ili Environment varijabli (Kestrel:Certificates:Default:Path)
+// Aplikacija sada čita putanju i lozinku iz varijabli okruženja (CERT_PATH i CERT_PASS)
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(8080, listenOptions =>
     {
-        var certPath = builder.Configuration["Kestrel:Certificates:Default:Path"];
-        var certPass = builder.Configuration["Kestrel:Certificates:Default:Password"];
+        var certPath = Environment.GetEnvironmentVariable("CERT_PATH");
+        var certPass = Environment.GetEnvironmentVariable("CERT_PASS");
         
         if (!string.IsNullOrEmpty(certPath) && File.Exists(certPath))
         {
             listenOptions.UseHttps(certPath, certPass);
-            Console.WriteLine($"[INFO] HTTPS omogućen sa sertifikatom: {certPath}");
         }
     });
 });
