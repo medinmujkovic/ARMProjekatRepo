@@ -4,25 +4,21 @@ using SudskiSistemApp.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // --- HTTPS KONFIGURACIJA ---
+// Čita iz appsettings.json ili Environment varijabli (Kestrel:Certificates:Default:Path)
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(8080, listenOptions =>
     {
-        var certPath = "/https/certifikat.pfx";
-        var certPass = "123";
+        var certPath = builder.Configuration["Kestrel:Certificates:Default:Path"];
+        var certPass = builder.Configuration["Kestrel:Certificates:Default:Password"];
         
-        if (File.Exists(certPath))
+        if (!string.IsNullOrEmpty(certPath) && File.Exists(certPath))
         {
             listenOptions.UseHttps(certPath, certPass);
-            Console.WriteLine($"[INFO] Uspješno učitan sertifikat: {certPath}");
-        }
-        else
-        {
-            Console.WriteLine($"[ERROR] Sertifikat NIJE pronađen na: {certPath}");
+            Console.WriteLine($"[INFO] HTTPS omogućen sa sertifikatom: {certPath}");
         }
     });
 });
-// ---------------------------
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddDistributedMemoryCache();
