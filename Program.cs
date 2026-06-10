@@ -3,14 +3,6 @@ using SudskiSistemApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenAnyIP(8080, listenOptions =>
-    {
-        listenOptions.UseHttps("/https/certifikat.pfx", "123");
-    });
-});
-
 builder.Services.AddControllersWithViews();
 builder.Services.AddDistributedMemoryCache();
 
