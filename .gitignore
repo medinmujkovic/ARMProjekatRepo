@@ -1,3 +1,4 @@
+.gitignore
 bin/
 obj/
 .vs/
@@ -6,6 +7,7 @@ UploadedEvidence/*
 !UploadedEvidence/.gitkeep
 terraform.tfvars
 .terraform/
+terraform/ubuntu@44.197.193.93
 *.tfplan
 *.tfstate
 *.tfstate.backup
