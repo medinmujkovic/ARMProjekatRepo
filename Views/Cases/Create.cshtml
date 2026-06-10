@@ -1,0 +1,44 @@
+@{
+    ViewData["Title"] = "Kreiranje predmeta";
+    ViewData["PageHeading"] = "Kreiranje sudskog predmeta";
+}
+
+<section class="form-page">
+    <div class="panel form-panel">
+        <div class="panel-header">
+            <div>
+                <h2>Novi sudski predmet</h2>
+                <p>Ovu funkcionalnost ima samo glavni inspektor.</p>
+            </div>
+        </div>
+
+        @if (ViewBag.Error is string error)
+        {
+            <div class="alert alert-error">@error</div>
+        }
+
+        <form asp-controller="Cases" asp-action="Create" method="post" class="form-grid">
+            @Html.AntiForgeryToken()
+            <label>
+                Broj predmeta
+                <input type="text" name="caseNumber" placeholder="SP-2026-003" required />
+            </label>
+            <label>
+                Nadležni sud
+                <input type="text" name="courtName" placeholder="Općinski sud Sarajevo" required />
+            </label>
+            <label class="wide">
+                Naziv predmeta
+                <input type="text" name="title" placeholder="Naziv sudskog predmeta" required />
+            </label>
+            <label class="wide">
+                Opis predmeta
+                <textarea name="description" rows="6" placeholder="Unesite osnovne podatke o predmetu..." required></textarea>
+            </label>
+            <div class="form-actions wide">
+                <a asp-controller="Cases" asp-action="Index" class="secondary-button">Nazad</a>
+                <button type="submit" class="primary-button">Kreiraj predmet</button>
+            </div>
+        </form>
+    </div>
+</section>

@@ -1,0 +1,54 @@
+@model List<CourtCase>
+@{
+    ViewData["Title"] = "Sudski predmeti";
+    ViewData["PageHeading"] = "Sudski predmeti";
+    bool canCreateCase = ViewBag.CanCreateCase is bool value && value;
+}
+
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <h2>Pregled sudskih predmeta</h2>
+            <p>Svi korisnici mogu pregledati postojeće sudske predmete.</p>
+        </div>
+        @if (canCreateCase)
+        {
+            <a asp-controller="Cases" asp-action="Create" class="primary-button">Kreiraj novi predmet</a>
+        }
+    </div>
+
+    <div class="toolbar">
+        <input type="search" id="caseSearch" placeholder="Pretraži po broju, nazivu ili sudu..." />
+        <span class="muted">Ukupno: @Model.Count</span>
+    </div>
+
+    <div class="table-wrapper">
+        <table id="casesTable">
+            <thead>
+                <tr>
+                    <th>Broj predmeta</th>
+                    <th>Naziv predmeta</th>
+                    <th>Nadležni sud</th>
+                    <th>Status</th>
+                    <th>Kreirao</th>
+                    <th>Datum</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.CaseNumber</td>
+                    <td>@item.Title</td>
+                    <td>@item.CourtName</td>
+                    <td><span class="status-pill">@item.Status</span></td>
+                    <td>@item.CreatedBy</td>
+                    <td>@item.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy")</td>
+                    <td><a asp-controller="Cases" asp-action="Details" asp-route-id="@item.Id">Detalji</a></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</section>

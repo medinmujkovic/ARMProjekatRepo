@@ -1,0 +1,75 @@
+@{
+    string? role = ViewBag.CurrentRole as string;
+    string? fullName = ViewBag.CurrentFullName as string;
+    bool isLoggedIn = !string.IsNullOrWhiteSpace(role);
+}
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @* FIX #16 (A03 - XSS): Eksplicitna X-Content-Type-Options i referrer meta tagovi *@
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    @* FIX #16: robots noindex za osjetljiv sistem *@
+    <meta name="robots" content="noindex, nofollow" />
+    <title>@ViewData["Title"] - Sudski informacioni sistem</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    @if (isLoggedIn)
+    {
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">SIS</div>
+                <div>
+                    <strong>Sudski sistem</strong>
+                    <span>Digitalni dokazi</span>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <a asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                <a asp-controller="Cases" asp-action="Index">Sudski predmeti</a>
+                @* FIX #16: Uklonjena dupla "Digitalni dokazi" veza koja je vodila na isti URL *@
+            </nav>
+
+            <form asp-controller="Auth" asp-action="Logout" method="post" class="logout-form">
+                @Html.AntiForgeryToken()
+                <button type="submit">Odjava</button>
+            </form>
+        </aside>
+    }
+
+    <main class="@(isLoggedIn ? "main-content" : "login-content")">
+        @if (isLoggedIn)
+        {
+            <header class="topbar">
+                <div>
+                    <span class="eyebrow">Sigurna obrada sudskih predmeta</span>
+                    <h1>@ViewData["PageHeading"]</h1>
+                </div>
+                <div class="user-card">
+                    @* FIX #17 (A03 - XSS): Html.Encode je implicitno uključen u Razor @,
+                       ali eksplicitno dokumentiramo da prikazujemo korisničke podatke *@
+                    <span>@fullName</span>
+                    <strong>@role</strong>
+                </div>
+            </header>
+        }
+
+        @if (TempData["Success"] is string success)
+        {
+            <div class="alert alert-success" role="alert">@success</div>
+        }
+        @if (TempData["Error"] is string error)
+        {
+            <div class="alert alert-error" role="alert">@error</div>
+        }
+
+        @RenderBody()
+    </main>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

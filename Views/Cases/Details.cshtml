@@ -1,0 +1,116 @@
+@model CaseDetailsViewModel
+@{
+    ViewData["Title"] = Model.Case.CaseNumber;
+    ViewData["PageHeading"] = "Detalji sudskog predmeta";
+    bool canUploadEvidence = ViewBag.CanUploadEvidence is bool value && value;
+}
+
+<section class="case-hero panel">
+    <div>
+        <span class="eyebrow">@Model.Case.CaseNumber</span>
+        <h2>@Model.Case.Title</h2>
+        <p>@Model.Case.Description</p>
+    </div>
+    <div class="case-meta">
+        <span><strong>Status:</strong> @Model.Case.Status</span>
+        <span><strong>Sud:</strong> @Model.Case.CourtName</span>
+        <span><strong>Kreirao:</strong> @Model.Case.CreatedBy</span>
+        <span><strong>Datum:</strong> @Model.Case.CreatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+    </div>
+</section>
+
+@if (Model.VerificationMessage is not null)
+{
+    <div class="alert @(Model.VerificationSucceeded == true ? "alert-success" : "alert-error")">
+        @Model.VerificationMessage
+    </div>
+}
+
+<section class="content-grid details-grid">
+    <div class="panel">
+        <div class="panel-header">
+            <div>
+                <h2>Digitalni dokazi</h2>
+                <p>Svaki dokaz je jasno povezan sa sudskim predmetom i ima sačuvanu SHA-256 vrijednost.</p>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Naziv fajla</th>
+                        <th>Tip</th>
+                        <th>Veličina</th>
+                        <th>Dodao</th>
+                        <th>Datum</th>
+                        <th>SHA-256</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @if (!Model.EvidenceFiles.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="empty-cell">Za ovaj predmet još nije dodan digitalni dokaz.</td>
+                    </tr>
+                }
+                @foreach (var evidence in Model.EvidenceFiles)
+                {
+                    <tr>
+                        <td>@evidence.OriginalFileName</td>
+                        <td>@evidence.FileExtension</td>
+                        <td>@(Math.Round(evidence.FileSizeBytes / 1024.0, 2)) KB</td>
+                        <td>@evidence.UploadedBy</td>
+                        <td>@evidence.UploadedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                        <td><code title="@evidence.Sha256Hash">@evidence.Sha256Hash.Substring(0, Math.Min(18, evidence.Sha256Hash.Length))...</code></td>
+                    </tr>
+                    <tr class="verify-row">
+                        <td colspan="6">
+                            <form asp-controller="Cases" asp-action="VerifyEvidence" method="post" enctype="multipart/form-data" class="inline-verify-form">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="caseId" value="@Model.Case.Id" />
+                                <input type="hidden" name="evidenceId" value="@evidence.Id" />
+                                <label>
+                                    Provjera integriteta fajla
+                                    <input type="file" name="verificationFile" required />
+                                </label>
+                                <button type="submit" class="secondary-button">Provjeri SHA-256</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <aside class="panel quick-panel">
+        <h2>Dodavanje dokaza</h2>
+        <p>Dodavanje je omogućeno samo glavnom inspektoru i inspektoru.</p>
+
+        @if (canUploadEvidence)
+        {
+            <form asp-controller="Cases" asp-action="UploadEvidence" method="post" enctype="multipart/form-data" class="form-stack">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="caseId" value="@Model.Case.Id" />
+                <label>
+                    Digitalni dokaz
+                    <input type="file" name="evidenceFile" required />
+                </label>
+                <small>Dozvoljeno: PDF, PNG, JPG, JPEG, TXT i DOCX. Maksimalno 10 MB.</small>
+                <button type="submit" class="primary-button full-width">Dodaj dokaz</button>
+            </form>
+        }
+        else
+        {
+            <div class="notice-box">
+                Sudija ima pravo pregleda dokaza i SHA-256 provjere, ali nema pravo dodavanja fajlova.
+            </div>
+        }
+
+        <div class="hash-info">
+            <strong>SHA-256 provjera</strong>
+            <p>Prilikom dodavanja fajla sistem računa hash vrijednost i čuva je u bazi. Kasnije se novi fajl može uporediti sa sačuvanim hashom.</p>
+        </div>
+    </aside>
+</section>
