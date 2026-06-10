@@ -4,7 +4,6 @@ using SudskiSistemApp.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // --- HTTPS KONFIGURACIJA ---
-// Aplikacija sada čita putanju i lozinku iz varijabli okruženja (CERT_PATH i CERT_PASS)
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(8080, listenOptions =>
@@ -12,22 +11,22 @@ builder.WebHost.ConfigureKestrel(options =>
         var certPath = Environment.GetEnvironmentVariable("CERT_PATH");
         var certPass = Environment.GetEnvironmentVariable("CERT_PASS");
         
-        // --- DODATNI LOGOVI ZA DIJAGNOSTIKU ---
-        Console.WriteLine($"[DEBUG] Pokušavam učitati sertifikat sa putanje: '{certPath}'");
-        
         if (!string.IsNullOrEmpty(certPath) && File.Exists(certPath))
         {
             listenOptions.UseHttps(certPath, certPass);
-            Console.WriteLine($"[SUCCESS] HTTPS je uspješno konfigurisan!");
-        }
-        else
-        {
-            Console.WriteLine($"[ERROR] Sertifikat NIJE pronađen ili varijabla nije setovana! Provjeri: {certPath}");
         }
     });
 });
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddDistributedMemoryCache();
+
+// OVO MORA BITI PRIJE builder.Build()
+builder.Services.AddHttpsRedirection(options =>
+{
+    options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
+    options.HttpsPort = 443;
+});
 
 // FIX #1: Session cookie
 builder.Services.AddSession(options =>
@@ -72,13 +71,19 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// FIX #5: HTTPS obavezan
+// Redoslijed middleware-a je kritičan:
+app.UseHttpsRedirection(); // Automatski preusmjerava HTTP na HTTPS
+app.UseStaticFiles();
+app.UseRouting();
+app.UseSession();
+
+// FIX #5: HTTPS obavezan (Ovo blokira ako neko zaobiđe redirekciju)
 app.Use(async (context, next) =>
 {
     if (!context.Request.IsHttps)
     {
         context.Response.StatusCode = StatusCodes.Status403Forbidden;
-        await context.Response.WriteAsync("HTTPS je obavezan za pristup aplikaciji.");
+        await context.Response.WriteAsync("HTTPS je obavezan.");
         return;
     }
     await next();
@@ -94,14 +99,8 @@ app.Use(async (context, next) =>
     context.Response.Headers["Content-Security-Policy"] = 
         "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; frame-ancestors 'none'; form-action 'self'; base-uri 'self';";
     context.Response.Headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
-
     await next();
 });
-
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseRouting();
-app.UseSession();
 
 // FIX #4: Blokiranje pristupa Upload direktorijumu
 app.Use(async (context, next) =>
