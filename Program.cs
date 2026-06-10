@@ -48,7 +48,7 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     // HSTS: min 1 godina, includeSubDomains
-    app.UseHsts();
+    //app.UseHsts();
 }
 
 // FIX #5 (A02/A05): Aplikacija ne smije servirati login niti druge stranice preko HTTP-a.
@@ -93,7 +93,7 @@ app.Use(async (context, next) =>
     await next();
 });
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
