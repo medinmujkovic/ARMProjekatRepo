@@ -50,6 +50,14 @@ if (!app.Environment.IsDevelopment())
     // HSTS: min 1 godina, includeSubDomains
     //app.UseHsts();
 }
+// Ovo dodaj u Program.cs ako već nije tu
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(8080, listenOptions =>
+    {
+        listenOptions.UseHttps("/https/certifikat.pfx", "123");
+    });
+});
 
 // FIX #5 (A02/A05): Aplikacija ne smije servirati login niti druge stranice preko HTTP-a.
 // Ako neko pokuša pristup preko nezaštićenog HTTP endpointa ili lokalnog MITM proxyja,
