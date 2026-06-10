@@ -9,4 +9,4 @@ deploy_application:
     - sudo docker stop arm_frontend || true
     - sudo docker rm -f arm_frontend || true
     - sudo docker build -t arm_apache_web:latest .
-    - sudo docker run -d --name arm_frontend -p 80:8080 -p 443:8080 -v /home/ubuntu/certs:/https -e ASPNETCORE_URLS="" -e ASPNETCORE_Kestrel__Certificates__Default__Path="/https/certifikat.pfx" -e ASPNETCORE_Kestrel__Certificates__Default__Password="123" --restart always arm_apache_web:latest
+    - sudo docker run -d --name arm_frontend -p 80:8080 -p 443:8080 -v /home/ubuntu/certs:/https -e ASPNETCORE_URLS="http://0.0.0.0:8080" -e ASPNETCORE_Kestrel__Certificates__Default__Path="/https/certifikat.pfx" -e ASPNETCORE_Kestrel__Certificates__Default__Password="123" --restart always arm_apache_web:latest
