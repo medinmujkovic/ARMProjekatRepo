@@ -4,3 +4,10 @@ obj/
 App_Data/*.db
 UploadedEvidence/*
 !UploadedEvidence/.gitkeep
+terraform.tfvars
+.terraform/
+*.tfplan
+*.tfstate
+*.tfstate.backup
+arm_key
+arm_key.pub

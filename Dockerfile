@@ -1,22 +1,30 @@
-# 1. Faza: Build aplikacije
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
-WORKDIR /app
+FROM ubuntu:22.04
 
-# Kopiraj i restore projekat
-COPY *.csproj ./
-RUN dotnet restore
+# Izbjegavanje interaktivnih upita tokom instalacije paketa
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Kopiraj ostatak koda i buildaj
-COPY . ./
-RUN dotnet publish -c Release -o out
+# 1. Instalacija Apache2 i SSL modula unutar Ubuntu baze
+RUN apt-get update && apt-get install -y \
+    apache2 \
+    && a2enmod ssl \
+    && a2enmod rewrite \
+    && rm -rf /var/lib/apt/lists/*
 
-# 2. Faza: Pokretanje aplikacije
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
-WORKDIR /app
-COPY --from=build-env /app/out .
+# 2. Kopiranje konfiguracije virtuelnog hosta (www) u Apache
+COPY www.conf /etc/apache2/sites-available/www.conf
 
-# Pretpostavimo da aplikacija sluša na portu 5000 unutar kontejnera
-ENV ASPNETCORE_URLS=http://+:5000
-EXPOSE 5000
+# 3. Gašenje defaultne stranice i paljenje našeg virtuelnog hosta
+RUN a2dissite 000-default.conf && a2ensite www.conf
 
-ENTRYPOINT ["dotnet", "SudskiSistemApp.dll"]
+# 4. Kopiranje cjelokupnog koda tvoje web aplikacije u Apache direktorij
+# Pretpostavljamo da se kod aplikacije nalazi u repozitoriju
+COPY . /var/www/html/
+
+# Osiguravamo da pocetna.html radi kao glavna stranica ako zatreba
+RUN cp /var/www/html/html/pocetna.html /var/www/html/index.html || true
+
+# Izlaganje portova 80 (HTTP) i 443 (HTTPS) kako traži zadatak
+EXPOSE 80 443
+
+# Pokretanje Apache servera u pozadini kontejnera
+CMD ["apache2ctl", "-D", "FOREGROUND"]

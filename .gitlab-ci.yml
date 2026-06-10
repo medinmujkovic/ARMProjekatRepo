@@ -1,0 +1,26 @@
+stages:
+  - deploy
+
+deploy_application:
+  stage: deploy
+  tags:
+    - arm-runner  # Tag koji si dodijelio svom GitLab Runneru na serveru
+  script:
+    # 1. Zaustavi i obriši stari kontejner ako postoji (da oslobodimo portove 80 i 443)
+    - sudo docker stop arm_frontend || true
+    - sudo docker rm arm_frontend || true
+
+    # 2. Buildaj novi Docker image (Ubuntu + Apache) koristeći Dockerfile iz repozitorija
+    - sudo docker build -t arm_apache_web:latest .
+
+    # 3. Pokreni novi kontejner sa mapiranim portovima i ubačenim certifikatima sa hosta
+    - sudo docker run -d \
+        --name arm_frontend \
+        -p 80:80 \
+        -p 443:443 \
+        -v /home/ubuntu/certs:/etc/apache2/certs \
+        --restart always \
+        arm_apache_web:latest
+
+    # 4. Ispis statusa kontejnera radi provjere u GitLab konzoli
+    - sudo docker ps
