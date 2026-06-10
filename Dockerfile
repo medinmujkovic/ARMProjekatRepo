@@ -8,7 +8,6 @@ RUN dotnet publish -c Release -o out
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/out .
-
-# Sada aplikacija unutra sluša na 8080 zahvaljujući appsettings.json
+# BEZ ENV ASPNETCORE_URLS
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "SudskiSistemApp.dll"]
