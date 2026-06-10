@@ -1,20 +1,8 @@
-stages:
-  - build
-  - deploy
-
-build_image:
-  stage: build
-  tags:
-    - arm-runner
-  script:
-    - sudo docker build -t arm_apache_web:latest .
-
 deploy_server:
   stage: deploy
   tags:
     - arm-runner
   script:
-    - echo "Pokrecem deploy..."
     - sudo docker stop arm_frontend || true
     - sudo docker rm arm_frontend || true
     - sudo docker run -d --name arm_frontend -p 80:8080 -p 443:8080 -v /home/ubuntu/certs:/https -e Kestrel__Certificates__Default__Path="/https/certifikat.pfx" -e Kestrel__Certificates__Default__Password="$CERT_PASS" -e ASPNETCORE_URLS="https://+:8080;http://+:8080" --restart always arm_apache_web:latest
