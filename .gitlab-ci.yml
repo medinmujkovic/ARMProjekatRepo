@@ -1,20 +1,17 @@
 stages:
-  - deploy
+  - debug
 
-deploy_application:
-  stage: deploy
+debug_application:
+  stage: debug
   tags:
     - arm-runner
   script:
-    # 1. Zaustavi i obriši stari kontejner ako postoji
-    - sudo docker stop arm_frontend || true
-    - sudo docker rm arm_frontend || true
+    - echo "=== 1. PROVJERA DA LI JE KONTEJNER ZIV ILI MRTV ==="
+    - sudo docker ps -a
 
-    # 2. Buildaj novi Docker image
-    - sudo docker build -t arm_apache_web:latest .
+    - echo "=== 2. ISPIS LOGOVA (AKO JE PUKAO DA VIDIMO ZASTO) ==="
+    - sudo docker logs arm_frontend || true
 
-    # 3. Pokreni novi kontejner (Sve u jednoj liniji bez kosih crta)
-    - sudo docker run -d --name arm_frontend -p 80:80 -p 443:443 -v /home/ubuntu/certs:/etc/apache2/certs --restart always arm_apache_web:latest
-
-    # 4. Ispis pokrenutih kontejnera
-    - sudo docker ps
+    - echo "=== 3. PROVJERA KOJI DOCKER KORISTI RUNNER ==="
+    - which docker
+    - sudo docker info | grep -i snap || echo "Nije snap verzija"
