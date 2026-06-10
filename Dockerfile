@@ -10,6 +10,9 @@ RUN apt-get update && apt-get install -y \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 
+# === OVDJE BRIŠEMO FABRIČKU STRANICU DA NE SMETA ===
+RUN rm -rf /var/www/html/*
+
 # 2. Kopiranje konfiguracije virtuelnog hosta (www) u Apache
 COPY www.conf /etc/apache2/sites-available/www.conf
 
@@ -17,7 +20,6 @@ COPY www.conf /etc/apache2/sites-available/www.conf
 RUN a2dissite 000-default.conf && a2ensite www.conf
 
 # 4. Kopiranje cjelokupnog koda tvoje web aplikacije u Apache direktorij
-# Pretpostavljamo da se kod aplikacije nalazi u repozitoriju
 COPY . /var/www/html/
 
 # Osiguravamo da pocetna.html radi kao glavna stranica ako zatreba
