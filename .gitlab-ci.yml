@@ -6,9 +6,8 @@ variables:
 
 deploy_to_ec2:
   stage: deploy
-  tags:
-    - arm-runner  # Provjeri je li 'arm' ili 'arm-runner' na tvom GitLabu
-  only:
+  tags: 
+    - arm-runner  
     - main
   script:
     - echo "Započinjem deployment Node.js aplikacije..."
