@@ -3,25 +3,24 @@ stages:
 
 deploy_to_ec2:
   stage: deploy
-  # Ako si prilikom registracije Runnera postavio neki 'tag' (npr. aws, ec2), dodaj ga ovdje. 
-  # Ako nisi, možeš obrisati sekciju 'tags'.
+  tags:
+    - arm-runner  # <--- OVO JE KLJUČNO! Govori GitLabu da koristi tvoj EC2 runner
   script:
     - echo "Započinjem automatski deployment na AWS EC2..."
     
-    # 1. Izgradnja nove Docker slike iz najnovijeg koda
+    # 1. Izgradnja nove Docker slike
     - sudo docker build -t arm_apache_web:latest .
     
-    # 2. Zaustavljanje i brisanje starog kontejnera 
-    # (|| true osigurava da pipeline ne pukne ako kontejner još ne postoji)
+    # 2. Zaustavljanje i brisanje starog kontejnera
     - sudo docker stop arm_frontend || true
     - sudo docker rm arm_frontend || true
     
     # 3. Pokretanje novog kontejnera na portu 8080
     - sudo docker run -d --name arm_frontend -p 8080:8080 -e ASPNETCORE_URLS="http://+:8080" --restart always arm_apache_web:latest
     
-    # 4. Restartovanje Apache servera da se osigura stabilna Proxy veza
+    # 4. Restartovanje Apache servera (Proxy)
     - sudo systemctl restart apache2
     
     - echo "Deployment uspješno završen!"
   only:
-    - main # Napomena: Ako se tvoja glavna grana zove 'master', promijeni ovo u 'master'
+    - main # Ako ti se glavna grana zove 'master', promijeni ovdje u master
