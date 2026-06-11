@@ -1,8 +1,27 @@
-deploy_server:
+stages:
+  - deploy
+
+deploy_to_ec2:
   stage: deploy
-  tags:
-    - arm-runner
+  # Ako si prilikom registracije Runnera postavio neki 'tag' (npr. aws, ec2), dodaj ga ovdje. 
+  # Ako nisi, možeš obrisati sekciju 'tags'.
   script:
+    - echo "Započinjem automatski deployment na AWS EC2..."
+    
+    # 1. Izgradnja nove Docker slike iz najnovijeg koda
+    - sudo docker build -t arm_apache_web:latest .
+    
+    # 2. Zaustavljanje i brisanje starog kontejnera 
+    # (|| true osigurava da pipeline ne pukne ako kontejner još ne postoji)
     - sudo docker stop arm_frontend || true
     - sudo docker rm arm_frontend || true
-    - sudo docker run -d --name arm_frontend -p 80:8080 -p 443:8080 -v /home/ubuntu/certs:/https -e Kestrel__Certificates__Default__Path="/https/certifikat.pfx" -e Kestrel__Certificates__Default__Password="$CERT_PASS" -e ASPNETCORE_URLS="https://+:8080;http://+:8080" --restart always arm_apache_web:latest
+    
+    # 3. Pokretanje novog kontejnera na portu 8080
+    - sudo docker run -d --name arm_frontend -p 8080:8080 -e ASPNETCORE_URLS="http://+:8080" --restart always arm_apache_web:latest
+    
+    # 4. Restartovanje Apache servera da se osigura stabilna Proxy veza
+    - sudo systemctl restart apache2
+    
+    - echo "Deployment uspješno završen!"
+  only:
+    - main # Napomena: Ako se tvoja glavna grana zove 'master', promijeni ovo u 'master'
