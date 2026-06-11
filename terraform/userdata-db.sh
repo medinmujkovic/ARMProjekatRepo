@@ -38,7 +38,7 @@ services:
     container_name: arm-mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${db_password}root
+      MYSQL_ROOT_PASSWORD: ${db_password}
       MYSQL_DATABASE: ${db_name}
       MYSQL_USER: ${db_user}
       MYSQL_PASSWORD: ${db_password}
