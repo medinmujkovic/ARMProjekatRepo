@@ -28,12 +28,7 @@ deploy_to_ec2:
     - sudo docker rm arm_frontend || true
     
     # 5. Pokretanje NOVOG kontejnera na portu 3000 sa ubačenim env varijablama za bazu
-    - sudo docker run -d \
-        --name arm_frontend \
-        -p 3000:3000 \
-        --env-file /etc/app.env \
-        --restart always \
-        arm_node_web:latest
+    - sudo docker run -d --name arm_frontend -p 3000:3000 --env-file /etc/app.env --restart always arm_node_web:latest
     
     # 6. Restart Apache proxy-ja
     - sudo systemctl restart apache2
