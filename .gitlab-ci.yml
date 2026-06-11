@@ -17,7 +17,7 @@ deploy_to_ec2:
     - rsync -av --delete --exclude='.git' --exclude='node_modules' --exclude='terraform' ./ $APP_DIR/
     
     # 2. Postavljanje dozvola
-    - chown -R ubuntu:ubuntu $APP_DIR
+    - sudo chown -R ubuntu:ubuntu $APP_DIR
     
     # 3. Build Node.js slike
     - cd $APP_DIR
