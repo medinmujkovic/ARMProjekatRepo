@@ -7,7 +7,7 @@ variables:
 deploy_to_ec2:
   stage: deploy
   tags:
-    - arm  # Provjeri je li 'arm' ili 'arm-runner' na tvom GitLabu
+    - arm-runner  # Provjeri je li 'arm' ili 'arm-runner' na tvom GitLabu
   only:
     - main
   script:
