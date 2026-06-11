@@ -1,0 +1,12 @@
+{
+  "id": 1,
+  "name": "Ajnur",
+  "email": "alex.writer@example.com",
+  "itemsPerPage": 25,
+  "twoFactorEnabled": false,
+  "preferredContact": "email",
+  "notificationFrequency": "Daily",
+  "plan": "Pro member",
+  "updatedAt": "2026-01-22T14:05:15.914Z",
+  "passwordUpdatedAt": "2026-01-22T14:05:15.914Z"
+}

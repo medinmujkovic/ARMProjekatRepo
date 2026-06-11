@@ -1,0 +1,10 @@
+{
+  "lineLocks": [
+    {
+      "scenarioId": 1,
+      "lineId": 1,
+      "userId": 2
+    }
+  ],
+  "characterLocks": []
+}

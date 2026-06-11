@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScenarijPro - Pisanje</title>
+  <link rel="stylesheet" href="../css/writing.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&family=Courier+Prime&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  
+  <header class="zaglavlje">
+    <div class="zaglavlje-lijevo">
+      <button class="dugme-nazad"><i class="fa-solid fa-arrow-left"></i></button>
+      <h1 class="naslov-projekta">THE LAST STARSHIP (Draft 2)</h1>
+    </div>
+
+    <div class="zaglavlje-centar">
+      <button class="dugme-tip">SCENA</button>
+      <button class="dugme-tip">AKCIJA</button>
+      <button class="dugme-tip">LIK</button>
+      <button class="dugme-tip">DIJALOG</button>
+    </div>
+
+    <div class="zaglavlje-desno">
+      <button class="dugme-spasi">SPASI</button>
+    </div>
+  </header>
+
+ 
+  <main class="sadrzaj">
+    
+    <div class="lijevi-panel">
+      <h2 class="naslov-scena">Scene (12)</h2>
+     <ul class="lista-scena">
+  <li class="scena aktivna">
+    <div class="scena-naslov">1. EXT. OBALA DRINE - JUTRO</div>
+    <div class="scena-info">(4/10)</div>
+  </li>
+  <li class="scena">
+    <div class="scena-naslov">2. INT. STAN U STAROM SARAJEVU - NOC</div>
+    <div class="scena-info">(3/10)</div>
+  </li>
+  <li class="scena">
+    <div class="scena-naslov">3. EXT. PLANINSKI PUT - POPODNE</div>
+    <div class="scena-info">(2/10)</div>
+  </li>
+  <li class="scena">
+    <div class="scena-naslov">4. EXT. MOSTARSKI STARI MOST - ZALAZAK SUNCA</div>
+    <div class="scena-info">(1/10)</div>
+  </li>
+</ul>
+
+    </div>
+
+    <div class="desni-sadrzaj">
+      <div class="toolbar-row">
+        <div class="editor-toolbar">
+          <button id="btnBrojRijeci">Broj rijeci</button>
+          <button id="btnUloge">Daj uloge</button>
+          <button id="btnPogresne">Pogresne uloge</button>
+          <button id="btnGrupisi">Grupisi uloge</button>
+          <button id="btnBrojLinija">Broj linija (uloga)</button>
+          <button id="btnScenarijUloge">Scenarij uloge</button>
+          <span style="margin-left:20px"></span>
+          <button id="btnBold"><strong>B</strong></button>
+          <button id="btnItalic"><em>I</em></button>
+          <button id="btnUnderline"><u>U</u></button>
+        </div>
+        <div class="ajax-controls">
+          <div class="ajax-row">
+            <div class="ajax-field">
+              <label for="inputScenarioId">ID scenarija</label>
+              <input id="inputScenarioId" type="number" min="1">
+            </div>
+            <div class="ajax-field">
+              <label for="inputUserId">ID korisnika</label>
+              <input id="inputUserId" type="number" min="1">
+            </div>
+            <button id="btnLoadScenario" type="button">Ucitaj</button>
+            <div class="ajax-field">
+              <label for="inputOldName">Staro ime</label>
+              <input id="inputOldName" type="text">
+            </div>
+          </div>
+
+          <div class="ajax-row">
+            <div class="ajax-field">
+              <label for="inputNewName">Novo ime</label>
+              <input id="inputNewName" type="text">
+            </div>
+            <button id="btnRenameCharacter" type="button">Preimenuj</button>
+            <div class="ajax-field">
+              <label for="inputSince">Od</label>
+              <input id="inputSince" type="number" min="0" value="0">
+            </div>
+            <button id="btnGetDeltas" type="button">Dohvati promjene</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="poruke" class="poruke" aria-live="polite"></div>
+
+      <div class="glavni-editor">
+       
+        <div id="divEditor" contenteditable="true" class="editor-polje">
+          <div>NAIDA</div>
+          <div>Mislis li da se sve ovo moglo zavrsiti drugacije?</div>
+          <div><br></div>
+          <div>DINO</div>
+          <div>Mozda... ali onda ne bismo bili ovdje.</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+<script src="../js/PoziviAjax.js"></script>
+<script src="../js/EditorTeksta.js"></script>
+<script src="../js/editor.js"></script>
+
+</body>
+</html>

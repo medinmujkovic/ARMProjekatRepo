@@ -1,0 +1,51 @@
+{
+  "id": 14,
+  "title": "THE LAST STARSHIP (Draft 2)",
+  "content": [
+    {
+      "lineId": 1,
+      "nextLineId": 2,
+      "text": "NAIDA"
+    },
+    {
+      "lineId": 2,
+      "nextLineId": 3,
+      "text": "Mislis li da se sve ovo moglo zavrsiti drugacije?"
+    },
+    {
+      "lineId": 3,
+      "nextLineId": 4,
+      "text": ""
+    },
+    {
+      "lineId": 4,
+      "nextLineId": 5,
+      "text": ""
+    },
+    {
+      "lineId": 5,
+      "nextLineId": 6,
+      "text": "DINO"
+    },
+    {
+      "lineId": 6,
+      "nextLineId": 7,
+      "text": "Mozda... ali onda ne bismo bili ovdje."
+    },
+    {
+      "lineId": 7,
+      "nextLineId": 8,
+      "text": ""
+    },
+    {
+      "lineId": 8,
+      "nextLineId": 9,
+      "text": ""
+    },
+    {
+      "lineId": 9,
+      "nextLineId": null,
+      "text": "adadadd a"
+    }
+  ]
+}

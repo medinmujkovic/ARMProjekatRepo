@@ -1,26 +1,43 @@
 stages:
   - deploy
 
+variables:
+  APP_DIR: /opt/app
+
 deploy_to_ec2:
   stage: deploy
   tags:
-    - arm-runner  # <--- OVO JE KLJUČNO! Govori GitLabu da koristi tvoj EC2 runner
+    - arm  # Provjeri je li 'arm' ili 'arm-runner' na tvom GitLabu
+  only:
+    - main
   script:
-    - echo "Započinjem automatski deployment na AWS EC2..."
+    - echo "Započinjem deployment Node.js aplikacije..."
     
-    # 1. Izgradnja nove Docker slike
-    - sudo docker build -t arm_apache_web:latest .
+    # 1. Kopiranje koda na server
+    - rsync -av --delete --exclude='.git' --exclude='node_modules' --exclude='terraform' ./ $APP_DIR/
     
-    # 2. Zaustavljanje i brisanje starog kontejnera
+    # 2. Postavljanje dozvola
+    - chown -R ubuntu:ubuntu $APP_DIR
+    
+    # 3. Build Node.js slike
+    - cd $APP_DIR
+    - sudo docker build -t arm_node_web:latest .
+    
+    # 4. Gašenje starog kontejnera ako postoji
     - sudo docker stop arm_frontend || true
     - sudo docker rm arm_frontend || true
     
-    # 3. Pokretanje novog kontejnera na portu 8080
-    - sudo docker run -d --name arm_frontend -p 8080:8080 -e ASPNETCORE_URLS="http://+:8080" --restart always arm_apache_web:latest
+    # 5. Pokretanje NOVOG kontejnera na portu 3000 sa ubačenim env varijablama za bazu
+    - sudo docker run -d \
+        --name arm_frontend \
+        -p 3000:3000 \
+        --env-file /etc/app.env \
+        --restart always \
+        arm_node_web:latest
     
-    # 4. Restartovanje Apache servera (Proxy)
+    # 6. Restart Apache proxy-ja
     - sudo systemctl restart apache2
     
-    - echo "Deployment uspješno završen!"
-  only:
-    - main # Ako ti se glavna grana zove 'master', promijeni ovdje u master
+    - echo "Node.js aplikacija je uspješno podignuta!"
+  environment:
+    name: production

@@ -1,0 +1,24 @@
+services:
+  app:
+    build: .
+    container_name: arm-app
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - /etc/app.env
+    depends_on:
+      - wait-for-db
+
+  wait-for-db:
+    image: busybox
+    command: >
+      sh -c "
+        until nc -z $DB_HOST 3306; do
+          echo 'Cekam MySQL...';
+          sleep 3;
+        done;
+        echo 'MySQL dostupan!'
+      "
+    env_file:
+      - /etc/app.env

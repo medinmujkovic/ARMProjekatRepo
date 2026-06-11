@@ -1,0 +1,31 @@
+{
+  "id": 12,
+  "title": "Naslov scenarija",
+  "content": [
+    {
+      "lineId": 1,
+      "nextLineId": 2,
+      "text": "Ajnur voli web tehnologije i back end."
+    },
+    {
+      "lineId": 2,
+      "nextLineId": 3,
+      "text": "Emir voli inženjersku fiziku."
+    },
+    {
+      "lineId": 3,
+      "nextLineId": 4,
+      "text": "Ne volimo kvizove."
+    },
+    {
+      "lineId": 4,
+      "nextLineId": 5,
+      "text": ""
+    },
+    {
+      "lineId": 5,
+      "nextLineId": null,
+      "text": ""
+    }
+  ]
+}

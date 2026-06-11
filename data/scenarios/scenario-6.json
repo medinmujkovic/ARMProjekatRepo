@@ -1,0 +1,11 @@
+{
+    "id":  6,
+    "title":  "Novi scenario",
+    "content":  [
+                    {
+                        "lineId":  1,
+                        "nextLineId":  null,
+                        "text":  ""
+                    }
+                ]
+}

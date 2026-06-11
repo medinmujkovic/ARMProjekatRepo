@@ -1,0 +1,59 @@
+{
+  "lastId": 6,
+  "items": [
+    {
+      "id": 1,
+      "title": "Sjecanje na rijeku",
+      "genre": "Drama / Dugometrazni film",
+      "status": "Druga verzija scenarija",
+      "pages": 98,
+      "lastEdited": "2026-01-22T11:03:50.350Z",
+      "active": true
+    },
+    {
+      "id": 2,
+      "title": "Na kraju ulice",
+      "genre": "Kriminalisticki film / Sarajevo",
+      "status": "Sinopsis zavrsen",
+      "pages": 14,
+      "lastEdited": "2026-01-21T14:03:50.350Z",
+      "active": false
+    },
+    {
+      "id": 3,
+      "title": "Iza planine",
+      "genre": "Psiholoski triler / Kratki film",
+      "status": "Zavrsna lektura",
+      "pages": 25,
+      "lastEdited": "2026-01-08T14:03:50.350Z",
+      "active": false
+    },
+    {
+      "id": 4,
+      "title": "Ljeto u Mostaru",
+      "genre": "Romanticna drama / Dugometrazni film",
+      "status": "U fazi produkcije",
+      "pages": 110,
+      "lastEdited": "2026-01-17T14:03:50.350Z",
+      "active": false
+    },
+    {
+      "id": 5,
+      "title": "Novi scenarij",
+      "genre": "Nedefinisano",
+      "status": "Novi projekat",
+      "pages": 1,
+      "lastEdited": "2026-01-22T14:04:07.224Z",
+      "active": false
+    },
+    {
+      "id": 6,
+      "title": "Novi projekat",
+      "genre": "Nedefinisano",
+      "status": "Novi projekat",
+      "pages": 1,
+      "lastEdited": "2026-01-22T14:04:23.292Z",
+      "active": false
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScenarijPro</title>
+    <link rel="stylesheet" href="../css/projects.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+<body>
+  
+    <div class="lijevi-sidebar">
+        <div class="sidebar-sadrzaj">
+            <h1 class="naslov-aplikacije">ScenarijPro</h1>
+            
+            <nav class="nav-meni">
+                <ul>
+                    <li class="nav-stavka aktivan">
+                        <i class="fa-solid fa-folder"></i>
+                        <span>Projekti</span>
+                    </li>
+                    <li class="nav-stavka">
+                        <i class="fa-solid fa-chart-bar"></i>
+                        <span>Statistika</span>
+                    </li>
+                    <li class="nav-stavka">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Postavke</span>
+                    </li>
+                </ul>
+            </nav>
+            
+            <hr class="linija-separator">
+            
+            <div class="profil-korisnika">
+                <div class="profil-korisnika-krug" id="userInitials">U</div>
+                <div class="info-profil">
+                    <div class="ime" id="userNameLabel">Alex Writer</div>
+                    <div class="status" id="userPlanLabel">Pro member</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="glavni-sadržaj">
+        <header class="zaglavlje">
+            <h1>Svi scenariji</h1>
+            <div class="header-actions">
+                <input type="text" class="polje-pretraga" id="projectSearch" placeholder="Pretraga">
+                <button class="dugme-noviprojekat" id="newProjectBtn">+ Novi projekat</button>
+            </div>
+        </header>
+        
+        <div class="kartice-grid" id="projectsGrid">
+            
+            <div class="kartica-aktivna">
+    <span class="aktivna-oznaka">Aktivan</span>
+    <h2 class="naslov-projekta">Sjećanje na rijeku</h2>
+    <p class="opis-projekta">Drama / Dugometražni film</p>
+    <div class="detalji-projekta">
+        <p><strong>Status:</strong> Druga verzija scenarija</p>
+        <p><strong>Broj stranica:</strong> 98</p>
+        <p><strong>Vrijeme posljednje izmjene:</strong> Prije 3 sata</p>
+    </div>
+</div>
+
+<div class="kartica">
+    <h2 class="naslov-projekta">Na kraju ulice</h2>
+    <p class="opis-projekta">Kriminalistički film / Sarajevo</p>
+    <div class="detalji-projekta">
+        <p><strong>Status:</strong> Sinopsis završen</p>
+        <p><strong>Broj stranica:</strong> 14</p>
+        <p><strong>Vrijeme posljednje izmjene:</strong> Jučer</p>
+    </div>
+</div>
+
+<div class="kartica">
+    <h2 class="naslov-projekta">Iza planine</h2>
+    <p class="opis-projekta">Psihološki triler / Kratki film</p>
+    <div class="detalji-projekta">
+        <p><strong>Status:</strong> Završna lektura</p>
+        <p><strong>Broj stranica:</strong> 25</p>
+        <p><strong>Vrijeme posljednje izmjene:</strong> Prije 2 sedmice</p>
+    </div>
+</div>
+
+<div class="kartica">
+    <h2 class="naslov-projekta">Ljeto u Mostaru</h2>
+    <p class="opis-projekta">Romantična drama / Dugometražni film</p>
+    <div class="detalji-projekta">
+        <p><strong>Status:</strong> U fazi produkcije</p>
+        <p><strong>Broj stranica:</strong> 110</p>
+        <p><strong>Vrijeme posljednje izmjene:</strong> Prije 5 dana</p>
+    </div>
+</div>
+            
+            
+           <div class="kartica-noviprojekat">
+  <div class="kartica-noviprojekat-sadrzaj">
+    <i class="fa-regular fa-square-plus kartica-noviprojekat-ikona"></i>
+    <p class="kartica-noviprojekat-tekst">Kreiraj novi scenarij</p>
+  </div>
+</div>
+
+        </div>
+    </main>
+    <script src="../js/projects.js"></script>
+</body>
+</html>

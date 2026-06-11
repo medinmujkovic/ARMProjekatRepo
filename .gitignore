@@ -1,15 +1,17 @@
-.gitignore
-bin/
-obj/
-.vs/
-App_Data/*.db
-UploadedEvidence/*
-!UploadedEvidence/.gitkeep
-terraform.tfvars
+# Node.js zavisnosti
+node_modules/
+npm-debug.log
+.env
+
+# Terraform fajlovi
 .terraform/
-terraform/ubuntu@44.197.193.93
-*.tfplan
 *.tfstate
 *.tfstate.backup
+*.tfplan
+terraform.tfvars
+
+# Ključevi (Nikada ne guranje na Git!)
 arm_key
 arm_key.pub
+*.pem
+*.pkey

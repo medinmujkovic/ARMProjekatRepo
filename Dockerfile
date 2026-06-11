@@ -1,13 +1,18 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /app
-COPY *.csproj ./
-RUN dotnet restore
-COPY . ./
-RUN dotnet publish -c Release -o out
+FROM node:20-alpine
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=build /app/out .
-# BEZ ENV ASPNETCORE_URLS
-EXPOSE 8080
-ENTRYPOINT ["dotnet", "SudskiSistemApp.dll"]
+
+# Kopiraj fajlove sa zavisnostima
+COPY package*.json ./
+
+# Instaliraj samo produkcijske pakete (brže i sigurnije)
+RUN npm install --omit=dev
+
+# Kopiraj ostatak koda aplikacije
+COPY . .
+
+# Otvori port 3000 za unutrašnji saobraćaj
+EXPOSE 3000
+
+# Pokreni Node.js server
+CMD ["node", "server.js"]
