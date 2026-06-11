@@ -69,21 +69,8 @@ resource "aws_instance" "armprojekat_server_public" {
   }
 }
 
-# 4. Dodjela Elastic IP adrese javnom serveru (Da bi DNS na Windows Serveru bio trajan)
-resource "aws_eip" "armprojekat_eip" {
-  domain = "vpc"
-  tags = {
-    Name = "armprojekat_EIP"
-  }
-}
-
-resource "aws_eip_association" "eip_assoc" {
-  instance_id   = aws_instance.armprojekat_server_public.id
-  allocation_id = aws_eip.armprojekat_eip.id
-}
-
-# Izlazni podatak: Public IP koji daješ kolegi za Windows Server DNS
+# 4. IZLAZNI PODATAK: Dobijamo direktni javni IP sa javnog servera
 output "public_ip" {
-  value       = aws_eip.armprojekat_eip.public_ip
+  value       = aws_instance.armprojekat_server_public.public_ip
   description = "Javna IP adresa tvog Web Servera. Unesi je u Windows Server DNS!"
 }

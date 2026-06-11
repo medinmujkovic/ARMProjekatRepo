@@ -27,3 +27,29 @@ variable "ssh_pubkey" {
   type        = string
   description = "SSH public key used to access EC2 instances"
 }
+
+# ─── NOVE VARIJABLE ZA BAZU I GITLAB (DODATO) ──────────────────────────────────
+
+variable "db_name" {
+  type        = string
+  description = "Naziv baze podataka za aplikaciju"
+  default     = "sudski_sistem"
+}
+
+variable "db_user" {
+  type        = string
+  description = "Korisnicko ime za pristup bazi podataka"
+  default     = "arm_user"
+}
+
+variable "db_password" {
+  type        = string
+  description = "Lozinka za bazu podataka"
+  sensitive   = true
+}
+
+variable "gitlab_token" {
+  type        = string
+  description = "GitLab Registration Token za Runner"
+  sensitive   = true
+}
