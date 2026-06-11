@@ -13,8 +13,8 @@ deploy_to_ec2:
   script:
     - echo "Započinjem deployment Node.js aplikacije..."
     
-    # 1. Kopiranje koda na server
-    - rsync -av --delete --exclude='.git' --exclude='node_modules' --exclude='terraform' ./ $APP_DIR/
+    # 1. Kopiranje koda na server (DODAN SUDO OVDJE)
+    - sudo rsync -av --delete --exclude='.git' --exclude='node_modules' --exclude='terraform' ./ $APP_DIR/
     
     # 2. Postavljanje dozvola
     - sudo chown -R ubuntu:ubuntu $APP_DIR
