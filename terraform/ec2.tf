@@ -22,11 +22,11 @@ resource "aws_instance" "armprojekat_server_private" {
   iam_instance_profile   = data.aws_iam_instance_profile.lab_instance_profile.name
 
   # Pokretanje userdata-db.sh skripte sa varijablama
-  user_data = templatefile("${path.module}/userdata-db.sh", {
-    db_name     = var.db_name
-    db_user     = var.db_user
-    db_password = var.db_password
-  })
+  user_data = base64encode(templatefile("${path.module}/userdata-db.sh", {
+     db_name     = var.db_name
+     db_user     = var.db_user
+     db_password = var.db_password
+  }))
 
   root_block_device {
     encrypted  = true
