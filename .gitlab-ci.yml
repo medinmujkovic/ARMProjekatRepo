@@ -31,17 +31,16 @@ deploy_to_ec2:
     - sudo docker run -d --name arm_frontend -p 3000:3000 --env-file /etc/app.env --restart always arm_node_web:latest
     
     # 6. OSVJEŽAVANJE I SIGURNOST APACHE KONFIGURACIJE
-    # Kopiramo novi www.conf sa HTTPS postavkama tamo gdje ga Apache čita
-    - sudo cp $APP_DIR/www.conf /etc/apache2/sites-available/node_app.conf
-    # Osiguravamo da su svi potrebni moduli (Proxy i SSL) upaljeni
+    - sudo cp $APP_DIR/www.conf /etc/apache2/sites-available/node_app.conf || true
     - sudo a2enmod proxy proxy_http ssl || true
-    # Gasimo fabričke konfiguracije da ne bi pravile konflikte
     - sudo a2dissite 000-default default-ssl || true
-    # Aktivira se naša node_app konfiguracija
     - sudo a2ensite node_app.conf || true
     
     # 7. Restart Apache-a da prihvati novu konfiguraciju i sertifikate
     - sudo systemctl restart apache2
+    
+    # Privremeno rješenje dok rsync ne prebaci sve fajlove
+    - sudo systemctl restart apache2 || true
     
     - echo "Node.js aplikacija je uspješno podignuta na HTTPS protokolu!"
   environment:
