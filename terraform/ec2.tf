@@ -21,12 +21,33 @@ resource "aws_instance" "armprojekat_server_private" {
   key_name               = aws_key_pair.armprojekat_ec2_access_key.key_name
   iam_instance_profile   = data.aws_iam_instance_profile.lab_instance_profile.name
 
-  # Pokretanje userdata-db.sh skripte sa varijablama
-  user_data = base64encode(templatefile("${path.module}/userdata-db.sh", {
-     db_name     = var.db_name
-     db_user     = var.db_user
-     db_password = var.db_password
-  }))
+ resource "aws_instance" "armprojekat_server_private" {
+  ami                    = data.aws_ami.ubuntu.id
+  instance_type          = "t2.micro"
+  subnet_id              = aws_subnet.armprojekat_subnet_private.id
+  vpc_security_group_ids = [aws_security_group.armprojekat_security_group.id]
+  key_name               = aws_key_pair.armprojekat_ec2_access_key.key_name
+  iam_instance_profile   = data.aws_iam_instance_profile.lab_instance_profile.name
+
+  # User data mora biti unutar ovih zagrada
+  user_data = base64encode(<<-EOF
+#!/bin/bash
+echo "Povezivanje baze: ${var.db_name}"
+HTTPS_VAR="neki_tekst"
+echo $HTTPS_VAR
+EOF
+  )
+
+  # Ovo mora biti unutar glavnog bloka (između { i })
+  root_block_device {
+    volume_size = 8
+  }
+
+  # Ovo mora biti unutar glavnog bloka
+  tags = {
+    Name = "armprojekat_server_private"
+  }
+} # OVO ZATVARA CIJELI RESOURCE
 
   root_block_device {
     encrypted  = true
