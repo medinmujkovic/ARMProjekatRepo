@@ -6,13 +6,19 @@ const seedData = require("./seed-data");
 
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "html")));
-app.use("/css", express.static(path.join(__dirname, "css")));
-app.use("/js", express.static(path.join(__dirname, "js")));
 
+// --- SIGURNOSNO PODEŠAVANJE STATIČKIH FAJLOVA I RUTA ---
+// 1. Ako HTML traži /css/stil.css, Express će sada ispravno gledati u /app/html/css/
+app.use("/css", express.static(path.join(__dirname, "html", "css")));
+app.use("/js", express.static(path.join(__dirname, "js")));
+// 2. Fallback za sve ostale statičke fajlove u html folderu
+app.use(express.static(path.join(__dirname, "html")));
+
+// 3. Glavna ruta koja ODMAH presreće zahtjev za "/" i servira tvoj html
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'html', 'scenarios.html'));
 });
+// --------------------------------------------------------
 
 const lineLocks = [];
 const characterLocks = [];
@@ -95,6 +101,7 @@ function replaceWholeWord(text, search, replacement) {
     return text.replace(pattern, replacement);
 }
 
+// Pomocna funkcija za kreiranje inicijalnog stanja scenarija
 function createInitialScenarioState(scenario) {
     return {
         id: scenario.id,
@@ -484,7 +491,7 @@ app.post("/api/scenarios/:scenarioId/characters/update", async (req, res) => {
                         { text: update.text },
                         { where: { id: update.id }, transaction: transaction }
                     )
-                )));
+                ))));
             }
 
             const timestamp = getUnixTimestamp();
@@ -704,7 +711,7 @@ async function startServer() {
         await seedDatabase();
         app.listen(PORT, () => {
             console.log("Server radi na portu " + PORT);
-            console.log("URL: http://localhost:" + PORT + "/writing.html");
+            console.log("URL: http://localhost:" + PORT + "/scenarios.html");
         });
     } catch (error) {
         console.error("Ne mogu pokrenuti server:", error);
