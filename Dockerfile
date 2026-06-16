@@ -15,4 +15,4 @@ COPY . .
 EXPOSE 3000
 
 # Pokreni Node.js server
-CMD ["node", "server.js"]
+CMD ["node", "server-projects-user.js"]

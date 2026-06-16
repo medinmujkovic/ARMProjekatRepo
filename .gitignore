@@ -1,17 +1,19 @@
-# Node.js zavisnosti
 node_modules/
 npm-debug.log
 .env
 
-# Terraform fajlovi
 .terraform/
 *.tfstate
 *.tfstate.backup
 *.tfplan
 terraform.tfvars
 
-# Ključevi (Nikada ne guranje na Git!)
 arm_key
 arm_key.pub
 *.pem
 *.pkey
+
+terraform
+terraform/ssl
+
+.gitignore
