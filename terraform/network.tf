@@ -50,7 +50,7 @@ resource "aws_eip" "armprojekat_eip" {
 
 resource "aws_nat_gateway" "armprojekat_nat_gateway" {
   allocation_id = aws_eip.armprojekat_eip.id
-  subnet_id     = aws_subnet.armprojekat_subnet_public.id
+  subnet_id      = aws_subnet.armprojekat_subnet_public.id
 
   depends_on = [
     aws_internet_gateway.armprojekat_igw
@@ -80,8 +80,8 @@ resource "aws_security_group" "armprojekat_security_group" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.user_source_ip]
-    description = "Allow SSH ingress"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow SSH ingress from anywhere to prevent timeout"
   }
 
   ingress {
@@ -101,34 +101,18 @@ resource "aws_security_group" "armprojekat_security_group" {
   }
 
   ingress {
-    from_port = 0
-    to_port   = 0
-    protocol  = "-1"
-    self      = true
-    description = "Allow traffic in security group"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    self        = true
+    description = "Allow traffic within security group"
   }
 
   egress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow HTTP egress"
-  }
-
-  egress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow HTTPS egress"
-  }
-
-  egress {
-    from_port = 0
-    to_port   = 0
-    protocol  = "-1"
-    self      = true
-    description = "Allow traffic in security group"
+    description = "Allow all outbound traffic for updates and installations"
   }
 }

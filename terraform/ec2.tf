@@ -19,13 +19,11 @@ resource "aws_instance" "armprojekat_server_private" {
   key_name               = aws_key_pair.armprojekat_ec2_access_key.key_name
   iam_instance_profile   = data.aws_iam_instance_profile.lab_instance_profile.name
 
-  user_data = base64encode(<<-EOF
-#!/bin/bash
-echo "Povezivanje baze: ${var.db_name}"
-HTTPS_VAR="neki_tekst"
-echo $HTTPS_VAR
-EOF
-  )
+  user_data = templatefile("${path.module}/userdata-db.sh", {
+    DB_NAME     = var.db_name
+    DB_USER     = var.db_user
+    DB_PASSWORD = var.db_password
+  })
 
   root_block_device {
     volume_size = 8
@@ -49,9 +47,9 @@ resource "aws_instance" "armprojekat_server_public" {
 
   user_data = templatefile("${path.module}/userdata.sh", {
     db_host      = aws_instance.armprojekat_server_private.private_ip
-    db_name      = var.db_name
-    db_user      = var.db_user
-    db_password  = var.db_password
+    DB_NAME     = var.db_name
+    DB_USER     = var.db_user
+    DB_PASSWORD = var.db_password
     domain_name  = "local.arm.com"
     gitlab_token = var.gitlab_token
   })
