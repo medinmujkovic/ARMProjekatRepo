@@ -83,12 +83,12 @@ a2dissite 000-default default-ssl www.conf || true
 a2ensite www.conf
 
 cat > /etc/app.env << EOF
-DB_HOST=$DB_HOST
-DB_NAME=$DB_NAME
-DB_USER=$DB_USER
-DB_PASSWORD=$DB_PASSWORD
-NODE_ENV=production
-PORT=3000
+export DB_HOST=$DB_HOST
+export DB_NAME=$DB_NAME
+export DB_USER=$DB_USER
+export DB_PASSWORD=$DB_PASSWORD
+export NODE_ENV=production
+export PORT=3000
 EOF
 
 chmod 600 /etc/app.env
