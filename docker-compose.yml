@@ -12,13 +12,13 @@ services:
 
   wait-for-db:
     image: busybox
-    env_file:
-      - /etc/app.env  # <-- KLJUČNO: Učitavamo dinamički env fajl i ovdje
+    environment:
+      - DB_HOST=${db_host}
     command: >
       sh -c "
-        until nc -z \$$DB_HOST 3306; do
-          echo \"Cekam MySQL na \$DB_HOST...\";
+        until nc -z $DB_HOST 3306; do
+          echo 'Cekam MySQL na $DB_HOST...';
           sleep 3;
         done;
-        echo 'MySQL je dostupan na adresi '\$DB_HOST'!'
+        echo 'MySQL je dostupan!'
       "
