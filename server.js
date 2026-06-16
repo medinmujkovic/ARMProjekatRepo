@@ -485,13 +485,13 @@ app.post("/api/scenarios/:scenarioId/characters/update", async (req, res) => {
                 }
             });
 
-           if (updates.length > 0) {
+            if (updates.length > 0) {
                 await Promise.all(updates.map(update => (
                     Line.update(
                         { text: update.text },
                         { where: { id: update.id }, transaction: transaction }
                     )
-                ))); // <-- Sada je ispravno zatvoreno
+                ))); 
             }
 
             const timestamp = getUnixTimestamp();

@@ -21,15 +21,7 @@ resource "aws_instance" "armprojekat_server_private" {
   key_name               = aws_key_pair.armprojekat_ec2_access_key.key_name
   iam_instance_profile   = data.aws_iam_instance_profile.lab_instance_profile.name
 
- resource "aws_instance" "armprojekat_server_private" {
-  ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t2.micro"
-  subnet_id              = aws_subnet.armprojekat_subnet_private.id
-  vpc_security_group_ids = [aws_security_group.armprojekat_security_group.id]
-  key_name               = aws_key_pair.armprojekat_ec2_access_key.key_name
-  iam_instance_profile   = data.aws_iam_instance_profile.lab_instance_profile.name
-
-  # User data mora biti unutar ovih zagrada
+  # Korištenje base64encode da izbjegnemo greške pri parsiranju
   user_data = base64encode(<<-EOF
 #!/bin/bash
 echo "Povezivanje baze: ${var.db_name}"
@@ -38,20 +30,10 @@ echo $HTTPS_VAR
 EOF
   )
 
-  # Ovo mora biti unutar glavnog bloka (između { i })
   root_block_device {
     volume_size = 8
-  }
-
-  # Ovo mora biti unutar glavnog bloka
-  tags = {
-    Name = "armprojekat_server_private"
-  }
-} # OVO ZATVARA CIJELI RESOURCE
-
-  root_block_device {
-    encrypted  = true
-    kms_key_id = aws_kms_key.ebs_encryption_key.arn
+    encrypted   = true
+    kms_key_id  = aws_kms_key.ebs_encryption_key.arn
   }
 
   tags = {
@@ -69,7 +51,7 @@ resource "aws_instance" "armprojekat_server_public" {
   iam_instance_profile        = data.aws_iam_instance_profile.lab_instance_profile.name
   associate_public_ip_address = true
 
-  # Pokretanje userdata.sh skripte - Prosljeđujemo IP privatnog servera baze!
+  # Pokretanje userdata.sh skripte
   user_data = templatefile("${path.module}/userdata.sh", {
     db_host      = aws_instance.armprojekat_server_private.private_ip
     db_name      = var.db_name
@@ -90,7 +72,7 @@ resource "aws_instance" "armprojekat_server_public" {
   }
 }
 
-# 4. IZLAZNI PODATAK: Dobijamo direktni javni IP sa javnog servera
+# 4. IZLAZNI PODATAK
 output "public_ip" {
   value       = aws_instance.armprojekat_server_public.public_ip
   description = "Javna IP adresa tvog Web Servera. Unesi je u Windows Server DNS!"
