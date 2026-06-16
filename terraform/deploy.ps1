@@ -1,4 +1,4 @@
-terraform apply -auto-approve
+terraform apply -replace="aws_instance.armprojekat_server_public" -auto-approve
 
 $public_ip = (terraform output -raw public_ip).Trim()
 

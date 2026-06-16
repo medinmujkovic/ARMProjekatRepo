@@ -14,7 +14,7 @@ APP_DIR="/opt/app"
 apt-get update -y
 apt-get upgrade -y
 
-apt-get install -y ca-certificates curl gnupg
+apt-get install -y ca-certificates curl gnupg openssl
 install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 chmod a+r /etc/apt/keyrings/docker.gpg
@@ -34,6 +34,12 @@ usermod -aG docker ubuntu
 apt-get install -y apache2
 a2enmod proxy proxy_http ssl rewrite headers
 systemctl enable apache2
+
+# Generisanje samopotpisanih SSL sertifikata koje Apache očekuje ispod
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout /etc/ssl/private/www.local.arm.com.key \
+  -out /etc/ssl/certs/www.local.arm.com.pem \
+  -subj "/C=BA/L=Sarajevo/O=ETF/OU=ARM/CN=local.arm.com"
 
 curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh" | bash
 apt-get install -y gitlab-runner
@@ -87,19 +93,17 @@ EOF
 
 chmod 600 /etc/app.env
 
+# Nova sintaksa za moderne GitLab tokene i brisanje po imenu
 cat > /opt/register-runner.sh << EOF
 #!/bin/bash
-gitlab-runner unregister --all-runners || true
+gitlab-runner unregister --name "arm-ec2-runner" || true
 
 gitlab-runner register \
   --non-interactive \
   --url "https://gitlab.com/" \
-  --registration-token "$GITLAB_TOKEN" \
+  --token "$GITLAB_TOKEN" \
   --executor "shell" \
-  --description "arm-ec2-runner" \
-  --tag-list "arm,deploy" \
-  --run-untagged="true" \
-  --locked="false"
+  --description "arm-ec2-runner"
 EOF
 chmod +x /opt/register-runner.sh
 

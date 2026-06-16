@@ -19,7 +19,11 @@ resource "aws_instance" "armprojekat_server_private" {
   key_name               = aws_key_pair.armprojekat_ec2_access_key.key_name
   iam_instance_profile   = data.aws_iam_instance_profile.lab_instance_profile.name
 
+  # Proslijeđene obje verzije (mala i velika slova) da pokriju cijelu skriptu
   user_data = templatefile("${path.module}/userdata-db.sh", {
+    db_name     = var.db_name
+    db_user     = var.db_user
+    db_password = var.db_password
     DB_NAME     = var.db_name
     DB_USER     = var.db_user
     DB_PASSWORD = var.db_password
@@ -45,11 +49,15 @@ resource "aws_instance" "armprojekat_server_public" {
   iam_instance_profile        = data.aws_iam_instance_profile.lab_instance_profile.name
   associate_public_ip_address = true
 
+  # Osiguran i javni server sa obje verzije varijabli
   user_data = templatefile("${path.module}/userdata.sh", {
     db_host      = aws_instance.armprojekat_server_private.private_ip
-    DB_NAME     = var.db_name
-    DB_USER     = var.db_user
-    DB_PASSWORD = var.db_password
+    db_name      = var.db_name
+    db_user      = var.db_user
+    db_password  = var.db_password
+    DB_NAME      = var.db_name
+    DB_USER      = var.db_user
+    DB_PASSWORD  = var.db_password
     domain_name  = "local.arm.com"
     gitlab_token = var.gitlab_token
   })
