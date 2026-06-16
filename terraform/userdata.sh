@@ -48,6 +48,10 @@ usermod -aG docker gitlab-runner
 mkdir -p $APP_DIR
 chown -R gitlab-runner:gitlab-runner $APP_DIR
 
+sudo usermod -aG docker gitlab-runner
+sudo chown -R gitlab-runner:gitlab-runner $APP_DIR
+sudo chmod -R 775 $APP_DIR
+
 mkdir -p /etc/apache2/ssl
 
 cat > /etc/apache2/sites-available/www.conf << 'APACHEEOF'

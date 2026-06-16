@@ -1,35 +1,18 @@
 stages:
   - deploy
 
-variables:
-  APP_DIR: /opt/app
-
 deploy_to_ec2:
   stage: deploy
   tags: 
     - arm-runner  
-  only:
-    - main
   script:
-    - echo "Započinjem moderni deployment putem Docker Compose-a..."
+    # 1. Sinhronizuj kod (korisnik gitlab-runner je vlasnik, ne treba sudo)
+    - rsync -av --delete --exclude='.git' --exclude='node_modules' --exclude='terraform' ./ /opt/app/
     
-    # 1. Kopiranje koda na server (izuzimamo osjetljive stvari)
-    - sudo rsync -av --delete --exclude='.git' --exclude='node_modules' --exclude='terraform' ./ $APP_DIR/
+    # 2. Pokreni deploy skriptu (ona već sadrži svu logiku za docker)
+    - sudo /opt/deploy.sh
     
-    # 2. Osiguravanje vlasništva
-    - sudo chown -R ubuntu:ubuntu $APP_DIR
-    
-    # 3. Pokretanje sistema kroz Docker Compose
-    - cd $APP_DIR
-    - sudo docker compose build
-    - sudo docker compose up -d
-    
-    # 4. OSVJEŽAVANJE APACHE KONFIGURACIJE
-    # (Ovo ostavljamo ako Apache i dalje služi kao reverzni proxy)
-    - sudo cp $APP_DIR/www.conf /etc/apache2/sites-available/node_app.conf
+    # 3. Ažuriraj Apache konfiguraciju
+    - sudo cp /opt/app/www.conf /etc/apache2/sites-available/node_app.conf
     - sudo a2ensite node_app.conf
     - sudo systemctl restart apache2
-    
-    - echo "Deployment zavrsen! Sistem podignut preko Docker Compose-a."
-  environment:
-    name: production
