@@ -134,3 +134,27 @@ systemctl restart apache2
 systemctl restart gitlab-runner
 
 echo "EC2 userdata setup uspješno završen!" >> /var/log/arm-setup.log
+
+# =========================================================================
+# DODANO: Pametni SSH Banner koji ti rješava problem praćenja stanja aplikacije
+# =========================================================================
+cat >> /home/ubuntu/.bashrc << 'BASHRCEOF'
+
+echo "=================================================================="
+echo "                   ARM EC2 SERVER STATUS BANNED                   "
+echo "=================================================================="
+if [ -f /var/log/arm-setup.log ] && grep -q "uspješno završen" /var/log/arm-setup.log; then
+    echo -e "\e[32m[STATUS]\e[0m Sistem i GitLab Runner su USPIJEŠNO instalirani!"
+    echo "------------------------------------------------------------------"
+    echo "Trenutno stanje Docker kontejnera na serveru:"
+    sudo docker ps
+    echo "------------------------------------------------------------------"
+    echo -e "Ako je gornja lista prazna (vidiš 503 grešku), to je \e[33mNORMALNO\e[0m."
+    echo "Sada idi na GitLab -> Build -> Pipelines i pokreni ručno vaš Pipeline!"
+else
+    echo -e "\e[33m[STATUS]\e[0m Skripta još uvijek instalira Docker, Apache i Runner u pozadini..."
+    echo "Za praćenje instalacije uživo ukucaj komandu:"
+    echo "sudo tail -f /var/log/cloud-init-output.log"
+fi
+echo "=================================================================="
+BASHRCEOF
