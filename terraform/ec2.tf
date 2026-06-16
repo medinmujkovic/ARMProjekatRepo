@@ -1,4 +1,3 @@
-# 1. Pronalaženje najnovijeg Ubuntu AMI-ja
 data "aws_ami" "ubuntu" {
   most_recent = true
   filter {
@@ -9,10 +8,9 @@ data "aws_ami" "ubuntu" {
     name   = "virtualization-type"
     values = ["hvm"]
   }
-  owners = ["099720109477"] # Canonical
+  owners = ["099720109477"]
 }
 
-# 2. PRIVATNI SERVER: MySQL Baza Podataka
 resource "aws_instance" "armprojekat_server_private" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t2.micro"
@@ -21,7 +19,6 @@ resource "aws_instance" "armprojekat_server_private" {
   key_name               = aws_key_pair.armprojekat_ec2_access_key.key_name
   iam_instance_profile   = data.aws_iam_instance_profile.lab_instance_profile.name
 
-  # Korištenje base64encode da izbjegnemo greške pri parsiranju
   user_data = base64encode(<<-EOF
 #!/bin/bash
 echo "Povezivanje baze: ${var.db_name}"
@@ -41,7 +38,6 @@ EOF
   }
 }
 
-# 3. JAVNI SERVER: Apache Web Server + Node.js App + GitLab Runner
 resource "aws_instance" "armprojekat_server_public" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = "t2.micro"
@@ -51,7 +47,6 @@ resource "aws_instance" "armprojekat_server_public" {
   iam_instance_profile        = data.aws_iam_instance_profile.lab_instance_profile.name
   associate_public_ip_address = true
 
-  # Pokretanje userdata.sh skripte
   user_data = templatefile("${path.module}/userdata.sh", {
     db_host      = aws_instance.armprojekat_server_private.private_ip
     db_name      = var.db_name
@@ -72,7 +67,6 @@ resource "aws_instance" "armprojekat_server_public" {
   }
 }
 
-# 4. IZLAZNI PODATAK
 output "public_ip" {
   value       = aws_instance.armprojekat_server_public.public_ip
   description = "Javna IP adresa tvog Web Servera. Unesi je u Windows Server DNS!"
