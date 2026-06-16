@@ -8,4 +8,4 @@ scp -o StrictHostKeyChecking=no -i ./armprojekat_ec2_access_key.pem -r ./ssl ubu
 
 ssh -o StrictHostKeyChecking=no -i ./armprojekat_ec2_access_key.pem ubuntu@${public_ip}
 
-sudo tail -f /var/log/cloud-init-output.log
+ssh -o StrictHostKeyChecking=no -i ./armprojekat_ec2_access_key.pem ubuntu@${public_ip} "sudo tail -f /var/log/cloud-init-output.log"
