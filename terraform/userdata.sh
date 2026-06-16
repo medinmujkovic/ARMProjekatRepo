@@ -3,7 +3,6 @@ set -e
 
 export DEBIAN_FRONTEND=noninteractive
 
-# ─── Varijable (Popunjava Terraform) ──────────────────────────────────────────
 DB_HOST="${db_host}"
 DB_NAME="${db_name}"
 DB_USER="${db_user}"
@@ -12,11 +11,9 @@ DOMAIN="${domain_name}"
 GITLAB_TOKEN="${gitlab_token}"
 APP_DIR="/opt/app"
 
-# ─── System update ────────────────────────────────────────────────────────────
 apt-get update -y
 apt-get upgrade -y
 
-# ─── Docker instalacija ───────────────────────────────────────────────────────
 apt-get install -y ca-certificates curl gnupg
 install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
@@ -34,43 +31,34 @@ systemctl enable docker
 systemctl start docker
 usermod -aG docker ubuntu
 
-# ─── Apache2 instalacija i moduli ─────────────────────────────────────────────
 apt-get install -y apache2
 a2enmod proxy proxy_http ssl rewrite headers
 systemctl enable apache2
 
-# ─── GitLab Runner instalacija ────────────────────────────────────────────────
 curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh" | bash
 apt-get install -y gitlab-runner
 usermod -aG docker gitlab-runner
 
-# ─── Aplikacijski direktorij i permisije ──────────────────────────────────────
 mkdir -p $APP_DIR
 chown -R gitlab-runner:gitlab-runner $APP_DIR
 
-# ─── SSL folder za svaki slučaj ───────────────────────────────────────────────
 mkdir -p /etc/apache2/ssl
 
-# ─── Apache VirtualHost konfiguracija ────────────────────────────────────────
 cat > /etc/apache2/sites-available/www.conf << 'APACHEEOF'
-# HTTP → HTTPS automatsko preusmjeravanje
 <VirtualHost *:80>
     ServerName DOMAIN_PLACEHOLDER
     ServerAlias www.DOMAIN_PLACEHOLDER
 
     RewriteEngine On
-    # VAŽNO: Dupli %% sprječava Terraform templatefile da pukne
     RewriteCond %%{HTTPS} off
     RewriteRule ^(.*)$ https://%%{HTTP_HOST}%%{REQUEST_URI} [R=301,L]
 </VirtualHost>
 
-# HTTPS – Reverse Proxy na Node.js (Port 3000)
 <VirtualHost *:443>
     ServerName DOMAIN_PLACEHOLDER
     ServerAlias www.DOMAIN_PLACEHOLDER
 
     SSLEngine on
-    # Putanje prilagođene tvojim stvarnim sertifikatima
     SSLCertificateFile    /etc/ssl/certs/www.local.arm.com.pem
     SSLCertificateKeyFile /etc/ssl/private/www.local.arm.com.key
 
@@ -78,20 +66,16 @@ cat > /etc/apache2/sites-available/www.conf << 'APACHEEOF'
     ProxyPass        / http://127.0.0.1:3000/
     ProxyPassReverse / http://127.0.0.1:3000/
 
-    # VAŽNO: Dupli $$ sprječava Terraform da baci grešku pri apply-u
     ErrorLog  $${APACHE_LOG_DIR}/arm-error.log
     CustomLog $${APACHE_LOG_DIR}/arm-access.log combined
 </VirtualHost>
 APACHEEOF
 
-# Zamijeni placeholder sa stvarnom domenom iz Terraforms
 sed -i "s/DOMAIN_PLACEHOLDER/$DOMAIN/g" /etc/apache2/sites-available/www.conf
 
-# Čišćenje starih/fabričkih konfiguracija i aktivacija nove
 a2dissite 000-default default-ssl www.conf || true
 a2ensite www.conf
 
-# ─── Sačuvanje env varijabli za Node.js aplikaciju ────────────────────────────
 cat > /etc/app.env << EOF
 DB_HOST=$DB_HOST
 DB_NAME=$DB_NAME
@@ -103,13 +87,10 @@ EOF
 
 chmod 600 /etc/app.env
 
-# ─── GitLab Runner automatizovana registracija ────────────────────────────────
 cat > /opt/register-runner.sh << EOF
 #!/bin/bash
-# Brišemo stare registracije ako postoje da izbjegnemo dupliranje
-gitlab-runner unregister --all || true
+gitlab-runner unregister --all-runners || true
 
-# Registracija novog runnera sa svježim tokenom
 gitlab-runner register \
   --non-interactive \
   --url "https://gitlab.com/" \
@@ -122,16 +103,13 @@ gitlab-runner register \
 EOF
 chmod +x /opt/register-runner.sh
 
-# Pokretanje registracije ako je token validan i proslijeđen
 if [ -n "$GITLAB_TOKEN" ] && [ "$GITLAB_TOKEN" != "glrt-xxxxxxxxxxxxxxxxxxxx" ]; then
   /opt/register-runner.sh || true
 fi
 
-# Dodavanje gitlab-runner korisnika u sudo grupu i davanje NOPASSWD prava
 usermod -aG sudo gitlab-runner
 echo "gitlab-runner ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/gitlab-runner
 
-# ─── Deploy skripta (koju poziva .gitlab-ci.yml) ──────────────────────────────
 cat > /opt/deploy.sh << 'DEPLOYEOF'
 #!/bin/bash
 set -e
@@ -141,7 +119,6 @@ source /etc/app.env
 
 cd $APP_DIR
 
-# Gašenje starih i podizanje novih kontejnera
 docker compose down --remove-orphans || true
 docker compose up -d --build
 
@@ -149,7 +126,6 @@ echo "Deploy završen: $(date)"
 DEPLOYEOF
 chmod +x /opt/deploy.sh
 
-# ─── Restartovanje servisa da prihvate sve izmjene ───────────────────────────
 systemctl restart apache2
 systemctl restart gitlab-runner
 
