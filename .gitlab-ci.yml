@@ -11,37 +11,25 @@ deploy_to_ec2:
   only:
     - main
   script:
-    - echo "Započinjem deployment Node.js aplikacije..."
+    - echo "Započinjem moderni deployment putem Docker Compose-a..."
     
-    # 1. Kopiranje koda na server preko rsync-a
+    # 1. Kopiranje koda na server (izuzimamo osjetljive stvari)
     - sudo rsync -av --delete --exclude='.git' --exclude='node_modules' --exclude='terraform' ./ $APP_DIR/
     
-    # 2. Postavljanje dozvola nad aplikativnim folderom
+    # 2. Osiguravanje vlasništva
     - sudo chown -R ubuntu:ubuntu $APP_DIR
     
-    # 3. Build-ovanje nove Node.js Docker slike
+    # 3. Pokretanje sistema kroz Docker Compose
     - cd $APP_DIR
-    - sudo docker build -t arm_node_web:latest .
+    - sudo docker compose build
+    - sudo docker compose up -d
     
-    # 4. Sigurno gašenje i brisanje prethodnog kontejnera ako postoji
-    - sudo docker stop arm_frontend || true
-    - sudo docker rm arm_frontend || true
-    
-    # 5. Pokretanje NOVOG kontejnera unutar Docker mreže na portu 3000
-    - sudo docker run -d --name arm_frontend -p 3000:3000 --env-file /etc/app.env --restart always arm_node_web:latest
-    
-    # 6. OSVJEŽAVANJE I SIGURNOST APACHE KONFIGURACIJE
-    - sudo cp $APP_DIR/www.conf /etc/apache2/sites-available/node_app.conf || true
-    - sudo a2enmod proxy proxy_http ssl || true
-    - sudo a2dissite 000-default default-ssl || true
-    - sudo a2ensite node_app.conf || true
-    
-    # 7. Restart Apache-a da prihvati novu konfiguraciju i sertifikate
+    # 4. OSVJEŽAVANJE APACHE KONFIGURACIJE
+    # (Ovo ostavljamo ako Apache i dalje služi kao reverzni proxy)
+    - sudo cp $APP_DIR/www.conf /etc/apache2/sites-available/node_app.conf
+    - sudo a2ensite node_app.conf
     - sudo systemctl restart apache2
     
-    # Privremeno rješenje dok rsync ne prebaci sve fajlove
-    - sudo systemctl restart apache2 || true
-    
-    - echo "Node.js aplikacija je uspješno podignuta na HTTPS protokolu!"
+    - echo "Deployment zavrsen! Sistem podignut preko Docker Compose-a."
   environment:
     name: production
