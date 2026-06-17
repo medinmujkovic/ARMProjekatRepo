@@ -45,6 +45,9 @@ curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/s
 apt-get install -y gitlab-runner
 usermod -aG docker gitlab-runner
 
+# >>> OVDJE UBACUJEMO DOZVOLU ZA SUDO BEZ LOZINKE <<<
+echo "gitlab-runner ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/gitlab-runner
+
 # Čišćenje i postavljanje direktorija aplikacije
 rm -rf $APP_DIR
 mkdir -p $APP_DIR
