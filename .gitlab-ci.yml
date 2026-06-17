@@ -8,19 +8,27 @@ deploy_to_ec2:
   script:
     - echo "Započinjem deploy sa GitLab Runnera..."
     
-    # 1. Sinhronizujemo svježi kod koji je GitLab upravo povukao iz trenutnog builds foldera u /opt/app
+    # 1. Sinhronizujemo svježi kod iz trenutnog builds foldera u /opt/app
     - sudo rsync -av --delete --exclude='.git' --exclude='node_modules' --exclude='terraform' ./ /opt/app/
     
-    # 2. Postavljamo ispravna vlasništva i dozvole
+    # 2. Rješavamo problem sa DB_HOST varijablom za Docker Compose
+    # Kopiramo sistemski env fajl direktno u aplikaciju kao .env kako bi ga Docker Compose automatski učitao
+    - sudo cp /etc/app.env /opt/app/.env
+    
+    # 3. Postavljamo ispravna vlasništva i dozvole unutar aplikacije
     - sudo chown -R gitlab-runner:gitlab-runner /opt/app
     - sudo chmod -R 775 /opt/app
     
-    # 3. Pokrećemo Docker Compose deploy skriptu
+    # 4. Pokrećemo Docker Compose deploy skriptu (sada će proći bez DB_HOST upozorenja)
     - sudo /opt/deploy.sh
     
-    # 4. Primjenjujemo Apache konfiguraciju direktno iz repozitorija
+    # 5. Primjenjujemo Apache konfiguraciju i automatski mijenjamo placeholder sa tvojom domenom
     - sudo cp /opt/app/www.conf /etc/apache2/sites-available/www.conf
+    - sudo sed -i "s/DOMAIN_PLACEHOLDER/local.arm.com/g" /etc/apache2/sites-available/www.conf
     - sudo a2ensite www.conf
+    
+    # 6. Testiramo Apache konfiguraciju prije restarta (odlična DevOps praksa)
+    - sudo apache2ctl configtest
     - sudo systemctl reload apache2
     
     - echo "Deployment uspješno završen!"
