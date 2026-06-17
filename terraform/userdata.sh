@@ -89,6 +89,8 @@ docker compose up -d --build
 DEPLOYEOF
 chmod +x /opt/deploy.sh
 
+cp /etc/app.env $APP_DIR/.env
+
 # Prvi deploy
 /opt/deploy.sh || true
 
