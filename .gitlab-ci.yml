@@ -8,13 +8,17 @@ deploy_to_ec2:
   script:
     - echo "Započinjem deploy sa GitLab Runnera..."
     
+    # 1. Sinhronizujemo svježi kod koji je GitLab upravo povukao iz trenutnog builds foldera u /opt/app
     - sudo rsync -av --delete --exclude='.git' --exclude='node_modules' --exclude='terraform' ./ /opt/app/
     
+    # 2. Postavljamo ispravna vlasništva i dozvole
     - sudo chown -R gitlab-runner:gitlab-runner /opt/app
     - sudo chmod -R 775 /opt/app
     
+    # 3. Pokrećemo Docker Compose deploy skriptu
     - sudo /opt/deploy.sh
     
+    # 4. Primjenjujemo Apache konfiguraciju direktno iz repozitorija
     - sudo cp /opt/app/www.conf /etc/apache2/sites-available/www.conf
     - sudo a2ensite www.conf
     - sudo systemctl reload apache2
