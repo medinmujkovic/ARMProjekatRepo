@@ -6,13 +6,19 @@ deploy_to_ec2:
   tags: 
     - arm-runner  
   script:
-    # 1. Sinhronizuj kod (korisnik gitlab-runner je vlasnik, ne treba sudo)
-    - rsync -av --delete --exclude='.git' --exclude='node_modules' --exclude='terraform' ./ /opt/app/
+    - echo "Započinjem deploy sa GitLab Runnera..."
     
-    # 2. Pokreni deploy skriptu (ona već sadrži svu logiku za docker)
+    - sudo rsync -av --delete --exclude='.git' --exclude='node_modules' --exclude='terraform' ./ /opt/app/
+    
+    - sudo chown -R gitlab-runner:gitlab-runner /opt/app
+    - sudo chmod -R 775 /opt/app
+    
     - sudo /opt/deploy.sh
     
-    # 3. Ažuriraj Apache konfiguraciju
-    - sudo cp /opt/app/www.conf /etc/apache2/sites-available/node_app.conf
-    - sudo a2ensite node_app.conf
-    - sudo systemctl restart apache2
+    - sudo cp /opt/app/www.conf /etc/apache2/sites-available/www.conf
+    - sudo a2ensite www.conf
+    - sudo systemctl reload apache2
+    
+    - echo "Deployment uspješno završen!"
+  environment:
+    name: production

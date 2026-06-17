@@ -10,8 +10,13 @@ DOMAIN="${domain_name}"
 GITLAB_TOKEN="${gitlab_token}"
 APP_DIR="/opt/app"
 
+# 1. Čekanje stabilne internet konekcije (da paketi ne puknu tokom Terraform apply)
+until curl -s --connect-timeout 5 https://www.google.com > /dev/null; do
+  sleep 3
+done
+
 apt-get update -y && apt-get upgrade -y
-apt-get install -y ca-certificates curl gnupg openssl git
+apt-get install -y ca-certificates curl gnupg openssl git rsync
 
 # Docker instalacija
 install -m 0755 -d /etc/apt/keyrings
@@ -29,44 +34,24 @@ apt-get install -y apache2
 a2enmod proxy proxy_http ssl rewrite headers
 systemctl enable apache2
 
-# SSL
+# SSL samopotpisani certifikat
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -keyout /etc/ssl/private/www.local.arm.com.key \
   -out /etc/ssl/certs/www.local.arm.com.pem \
   -subj "/C=BA/L=Sarajevo/O=ETF/OU=ARM/CN=local.arm.com"
 
-# GitLab Runner
+# GitLab Runner instalacija
 curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh" | bash
 apt-get install -y gitlab-runner
 usermod -aG docker gitlab-runner
 
-# Setup foldera
+# Čišćenje i postavljanje direktorija aplikacije
+rm -rf $APP_DIR
 mkdir -p $APP_DIR
 chown -R gitlab-runner:gitlab-runner $APP_DIR
 chmod -R 775 $APP_DIR
 
-# Apache Config
-cat > /etc/apache2/sites-available/www.conf << APACHEEEOF
-<VirtualHost *:80>
-    ServerName $DOMAIN
-    RewriteEngine On
-    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
-</VirtualHost>
-<VirtualHost *:443>
-    ServerName $DOMAIN
-    SSLEngine on
-    SSLCertificateFile /etc/ssl/certs/www.local.arm.com.pem
-    SSLCertificateKeyFile /etc/ssl/private/www.local.arm.com.key
-    ProxyPreserveHost On
-    ProxyPass / http://127.0.0.1:3000/
-    ProxyPassReverse / http://127.0.0.1:3000/
-</VirtualHost>
-APACHEEEOF
-
-a2dissite 000-default default-ssl || true
-a2ensite www.conf
-
-# Env file
+# Env file za aplikaciju
 cat > /etc/app.env << EOF
 DB_HOST=$DB_HOST
 DB_NAME=$DB_NAME
@@ -77,19 +62,20 @@ PORT=3000
 EOF
 chmod 600 /etc/app.env
 
-# Runner register
-cat > /opt/register-runner.sh << EOF
-#!/bin/bash
-gitlab-runner register --non-interactive --url "https://gitlab.com/" --token "$GITLAB_TOKEN" --executor "shell" --description "arm-ec2-runner"
-EOF
-chmod +x /opt/register-runner.sh
-/opt/register-runner.sh || true
+# Čišćenje starih registracija runnera i ponovna registracija
+rm -f /etc/gitlab-runner/config.toml
+gitlab-runner register \
+  --non-interactive \
+  --url "https://gitlab.com/" \
+  --token "$GITLAB_TOKEN" \
+  --executor "shell" \
+  --description "arm-ec2-runner" || true
 
-# Git Clone (Ako repo nije javan, koristi Deploy Token format u URL-u)
-git clone https://glrt-8ggXm8vG5TFRIpBKyn2mQmM6MQpvOjEKcDoxZGhnbTAKdDozCnU6bjNyOWoc.01.1o0r6g0e6@gitlab.com/arm-group2/arm.git $APP_DIR || true
+# Kloniranje repozitorija
+git clone https://gitlab-ci-token:$GITLAB_TOKEN@gitlab.com/arm-group2/arm.git $APP_DIR || true
 chown -R gitlab-runner:gitlab-runner $APP_DIR
 
-# Deploy skripta
+# Deploy skripta na hostu
 cat > /opt/deploy.sh << 'DEPLOYEOF'
 #!/bin/bash
 set -e
@@ -101,7 +87,14 @@ DEPLOYEOF
 chmod +x /opt/deploy.sh
 
 # Prvi deploy
-sudo -u gitlab-runner /opt/deploy.sh || true
+/opt/deploy.sh || true
+
+# Apache konfiguracija iz povučenog koda (da se izbjegne dupliranje)
+if [ -f "$APP_DIR/www.conf" ]; then
+  cp $APP_DIR/www.conf /etc/apache2/sites-available/www.conf
+  a2dissite 000-default default-ssl || true
+  a2ensite www.conf
+fi
 
 systemctl restart apache2
 systemctl restart gitlab-runner
