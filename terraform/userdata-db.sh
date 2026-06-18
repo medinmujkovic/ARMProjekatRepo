@@ -6,7 +6,6 @@ DB_NAME="${db_name}"
 DB_USER="${db_user}"
 DB_PASSWORD="${db_password}"
 
-# 1. Čekanje stabilne internet konekcije preko NAT Gateway-a
 echo "Čekam internet konekciju preko NAT Gateway-a..."
 until curl -s --connect-timeout 5 https://www.google.com > /dev/null; do
   echo "Internet još nije dostupan na privatnoj instanci, čekam 5 sekundi..."
@@ -14,18 +13,16 @@ until curl -s --connect-timeout 5 https://www.google.com > /dev/null; do
 done
 echo "Internet dostupan! Nastavljam instalaciju baze..."
 
-# 2. Čekanje da se oslobodi pozadinski apt lock
 echo "Čekam da se oslobodi apt lock na bazi..."
 while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 ; do
   echo "Apt lock je zauzet, čekam 5 sekundi..."
   sleep 5
 done
 
-# 3. Instalacija Docker-a na privatnoj instanci
 apt-get update -y && apt-get upgrade -y
 apt-get install -y ca-certificates curl gnupg openssl
 
-# Instalacija Dockera (Sa ispravljenom 'jammy' oznakom)
+
 install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 chmod a+r /etc/apt/keyrings/docker.gpg
@@ -35,7 +32,6 @@ apt-get install -y docker-ce docker-ce-cli containerd.io
 
 systemctl enable docker && systemctl start docker
 
-# 4. Pokretanje baze u Docker kontejneru sa skip-name-resolve
 echo "Pokrećem MySQL Docker kontejner sa automatskom konfiguracijom..."
 docker run -d \
   --name arm-db-container \

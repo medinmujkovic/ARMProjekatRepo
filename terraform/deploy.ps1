@@ -1,11 +1,10 @@
-# 1. Pokretanje Terraform-a
+
 terraform init
 terraform plan -out terraform.tfplan
 terraform apply "terraform.tfplan"
 
 $public_ip = (terraform output -raw public_ip).Trim()
 
-# 2. Pametno čekanje da SSH port 22 postane aktivan
 Write-Host "Čekam da SSH port 22 na $public_ip postane dostupan..." -ForegroundColor Yellow
 while ($true) {
     try {
@@ -21,7 +20,6 @@ while ($true) {
     Start-Sleep -Seconds 2
 }
 
-# 3. ČEKANJE DA AWS ZAVRŠI INSTALACIJU DOCKER-A I APACHE-A (Rješava race condition!)
 Write-Host "Čekam da AWS završi instalaciju Dockera, Apache-a i GitLab Runnera (ovo može trajati 2-3 minute)..." -ForegroundColor Yellow
 while ($true) {
     try {
@@ -31,26 +29,23 @@ while ($true) {
             break
         }
     } catch {
-        # Ako se SSH nakratko prekine, čekamo ponovo
+        
     }
     Start-Sleep -Seconds 10
 }
 
-# 4. Pakovanje lokalnog koda (izuzimamo terraform, .git i node_modules)
 Write-Host "Pakujem lokalni kod aplikacije..." -ForegroundColor Cyan
 if (Test-Path .\app.tar.gz) { Remove-Item .\app.tar.gz -Force }
 tar -czf app.tar.gz --exclude='terraform' --exclude='.git' --exclude='node_modules' --exclude='app.tar.gz' -C .. .
 
-# 5. Kopiranje arhive, SSL foldera i privatnog ključa na server
 Write-Host "Kopiram arhivu i ključeve na server..." -ForegroundColor Cyan
 scp -o StrictHostKeyChecking=no -i ./armprojekat_ec2_access_key.pem .\app.tar.gz ubuntu@${public_ip}:/home/ubuntu/
 scp -o StrictHostKeyChecking=no -i ./armprojekat_ec2_access_key.pem -r ./ssl ubuntu@${public_ip}:/home/ubuntu/
-# Kopiramo ključ na javni server kako biste sa njega mogli SSH-ovati na privatni server baze
 scp -o StrictHostKeyChecking=no -i ./armprojekat_ec2_access_key.pem ./armprojekat_ec2_access_key.pem ubuntu@${public_ip}:/home/ubuntu/
 
 Remove-Item .\app.tar.gz -Force
 
-# 6. Inicijalizacija aplikacije na serveru (Sada kada su i Docker i /opt/app 100% spremni!)
+
 Write-Host "Pokrećem aplikaciju i konfiguraciju na serveru..." -ForegroundColor Green
 ssh -o StrictHostKeyChecking=no -i ./armprojekat_ec2_access_key.pem ubuntu@${public_ip} "
   sudo mkdir -p /opt/app &&

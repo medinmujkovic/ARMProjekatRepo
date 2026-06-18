@@ -8,25 +8,19 @@ deploy_to_ec2:
   script:
     - echo "Započinjem deploy sa GitLab Runnera..."
     
-    # 1. Sinhronizujemo kod
     - sudo rsync -av --delete --exclude='.git' --exclude='node_modules' --exclude='terraform' ./ /opt/app/
     
-    # 2. Rješavamo problem sa DB_HOST varijablom
     - sudo cp /etc/app.env /opt/app/.env
     
-    # 3. Postavljamo ispravna vlasništva i dozvole
     - sudo chown -R gitlab-runner:gitlab-runner /opt/app
     - sudo chmod -R 775 /opt/app
     
-    # 4. Pokrećemo Docker Compose deploy skriptu
     - sudo /opt/deploy.sh
     
-    # 5. Primjenjujemo Apache konfiguraciju
     - sudo cp /opt/app/www.conf /etc/apache2/sites-available/www.conf
     - sudo a2ensite www.conf
     - sudo a2dissite 000-default.conf
     
-    # 6. Testiramo i restartujemo Apache
     - sudo apache2ctl configtest
     - sudo systemctl reload apache2
     

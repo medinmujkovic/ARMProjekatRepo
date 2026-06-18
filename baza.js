@@ -5,7 +5,6 @@ const sequelize = new Sequelize(
     process.env.DB_USER || "root",
     process.env.DB_PASSWORD || "password",
     {
-        // Uzima isključivo vrijednost iz Docker okruženja (koja dolazi iz /etc/app.env)
         host: process.env.DB_HOST, 
         dialect: "mysql",
         port: 3306,
