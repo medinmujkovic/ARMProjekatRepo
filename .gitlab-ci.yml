@@ -8,7 +8,7 @@ deploy_to_ec2:
   script:
     - echo "Započinjem deploy sa GitLab Runnera..."
     
-    # 1. Sinhronizujemo svježi kod
+    # 1. Sinhronizujemo kod
     - sudo rsync -av --delete --exclude='.git' --exclude='node_modules' --exclude='terraform' ./ /opt/app/
     
     # 2. Rješavamo problem sa DB_HOST varijablom
