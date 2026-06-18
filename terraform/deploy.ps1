@@ -21,24 +21,35 @@ while ($true) {
     Start-Sleep -Seconds 2
 }
 
-Start-Sleep -Seconds 5
+# 3. ČEKANJE DA AWS ZAVRŠI POZADINSKU INSTALACIJU DOCKER-A I APACHE-A (Rješava race condition!)
+Write-Host "Čekam da AWS završi instalaciju Dockera, Apache-a i GitLab Runnera (ovo može trajati 2-3 minute)..." -ForegroundColor Yellow
+while ($true) {
+    try {
+        $setup_status = ssh -o StrictHostKeyChecking=no -i ./armprojekat_ec2_access_key.pem ubuntu@${public_ip} "if [ -f /var/lib/cloud/instance/boot-finished ]; then echo 'GOTOVO'; else echo 'CEKAJ'; fi"
+        if ($setup_status -match "GOTOVO") {
+            Write-Host "AWS pozadinska instalacija je u potpunosti završena!" -ForegroundColor Green
+            break
+        }
+    } catch {
+        # Ako se SSH nakratko prekine, čekamo ponovo
+    }
+    Start-Sleep -Seconds 10
+}
 
-# 3. Pakovanje lokalnog koda (izuzimamo terraform, .git i node_modules)
+# 4. Pakovanje lokalnog koda (izuzimamo terraform, .git i node_modules)
 Write-Host "Pakujem lokalni kod aplikacije..." -ForegroundColor Cyan
 if (Test-Path .\app.tar.gz) { Remove-Item .\app.tar.gz -Force }
-# tar je ugrađen u Windows i idealan je za očuvanje strukture
 tar -czf app.tar.gz --exclude='terraform' --exclude='.git' --exclude='node_modules' --exclude='app.tar.gz' -C .. .
 
-# 4. Kopiranje arhive, SSL foldera i privatnog ključa na server
+# 5. Kopiranje arhive, SSL foldera i privatnog ključa na server
 Write-Host "Kopiram arhivu i ključeve na server..." -ForegroundColor Cyan
 scp -o StrictHostKeyChecking=no -i ./armprojekat_ec2_access_key.pem .\app.tar.gz ubuntu@${public_ip}:/home/ubuntu/
 scp -o StrictHostKeyChecking=no -i ./armprojekat_ec2_access_key.pem -r ./ssl ubuntu@${public_ip}:/home/ubuntu/
-# Kopiramo ključ na javni server kako biste sa njega mogli SSH-ovati na privatni server baze
 scp -o StrictHostKeyChecking=no -i ./armprojekat_ec2_access_key.pem ./armprojekat_ec2_access_key.pem ubuntu@${public_ip}:/home/ubuntu/
 
 Remove-Item .\app.tar.gz -Force
 
-# 5. Inicijalizacija aplikacije na serveru
+# 6. Inicijalizacija aplikacije na serveru (Sada kada su i Docker i /opt/app 100% spremni!)
 Write-Host "Pokrećem aplikaciju i konfiguraciju na serveru..." -ForegroundColor Green
 ssh -o StrictHostKeyChecking=no -i ./armprojekat_ec2_access_key.pem ubuntu@${public_ip} "
   sudo tar -xzf /home/ubuntu/app.tar.gz -C /opt/app/ &&
