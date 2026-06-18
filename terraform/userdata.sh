@@ -10,7 +10,6 @@ DOMAIN="${domain_name}"
 GITLAB_TOKEN="${gitlab_token}"
 APP_DIR="/opt/app"
 
-# 1. Čekanje stabilne internet konekcije
 until curl -s --connect-timeout 5 https://www.google.com > /dev/null; do
   sleep 3
 done

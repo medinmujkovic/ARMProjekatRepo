@@ -1,134 +1,83 @@
-const Sequelize = require("sequelize");
+const { DataTypes } = require("sequelize");
 const sequelize = require("./baza");
 
-const Scenario = sequelize.define("Scenario", {
+const Project = sequelize.define("Project", {
     id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
     title: {
-        type: Sequelize.STRING,
-        allowNull: false
-    }
-}, {
-    timestamps: false,
-    freezeTableName: true,
-    tableName: "Scenario"
-});
-
-const Line = sequelize.define("Line", {
-    id: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    lineId: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false
     },
-    text: {
-        type: Sequelize.TEXT,
+    genre: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    status: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    pages: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    lastEdited: {
+        type: DataTypes.DATE,
         allowNull: false,
-        defaultValue: ""
+        defaultValue: DataTypes.NOW
     },
-    nextLineId: {
-        type: Sequelize.INTEGER,
-        allowNull: true
-    },
-    scenarioId: {
-        type: Sequelize.INTEGER,
-        allowNull: false
+    active: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
     }
-}, {
-    timestamps: false,
-    freezeTableName: true,
-    tableName: "Line",
-    indexes: [
-        {
-            unique: true,
-            fields: ["scenarioId", "lineId"]
-        }
-    ]
 });
 
-const Delta = sequelize.define("Delta", {
+const User = sequelize.define("User", {
     id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    scenarioId: {
-        type: Sequelize.INTEGER,
+    name: {
+        type: DataTypes.STRING,
         allowNull: false
     },
-    type: {
-        type: Sequelize.STRING,
+    email: {
+        type: DataTypes.STRING,
         allowNull: false
     },
-    lineId: {
-        type: Sequelize.INTEGER,
-        allowNull: true
+    itemsPerPage: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 25
     },
-    nextLineId: {
-        type: Sequelize.INTEGER,
-        allowNull: true
+    twoFactorEnabled: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
     },
-    content: {
-        type: Sequelize.TEXT,
-        allowNull: true
+    preferredContact: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "email"
     },
-    oldName: {
-        type: Sequelize.STRING,
-        allowNull: true
+    notificationFrequency: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "Daily"
     },
-    newName: {
-        type: Sequelize.STRING,
-        allowNull: true
+    plan: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "Pro member"
     },
-    timestamp: {
-        type: Sequelize.INTEGER,
-        allowNull: false
+    passwordUpdatedAt: {
+        type: DataTypes.DATE,
+        allowNull: true
     }
-}, {
-    timestamps: false,
-    freezeTableName: true,
-    tableName: "Delta"
 });
 
-const Checkpoint = sequelize.define("Checkpoint", {
-    id: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    scenarioId: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-    },
-    timestamp: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-    }
-}, {
-    timestamps: false,
-    freezeTableName: true,
-    tableName: "Checkpoint"
-});
-
-Scenario.hasMany(Line, { foreignKey: "scenarioId", onDelete: "CASCADE" });
-Line.belongsTo(Scenario, { foreignKey: "scenarioId" });
-
-Scenario.hasMany(Delta, { foreignKey: "scenarioId", onDelete: "CASCADE" });
-Delta.belongsTo(Scenario, { foreignKey: "scenarioId" });
-
-Scenario.hasMany(Checkpoint, { foreignKey: "scenarioId", onDelete: "CASCADE" });
-Checkpoint.belongsTo(Scenario, { foreignKey: "scenarioId" });
-
-module.exports = {
-    sequelize,
-    Scenario,
-    Line,
-    Delta,
-    Checkpoint
-};
+module.exports = { sequelize, Project, User };
