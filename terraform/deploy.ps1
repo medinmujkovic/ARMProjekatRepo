@@ -21,7 +21,7 @@ while ($true) {
     Start-Sleep -Seconds 2
 }
 
-# 3. ČEKANJE DA AWS ZAVRŠI POZADINSKU INSTALACIJU DOCKER-A I APACHE-A (Rješava race condition!)
+# 3. ČEKANJE DA AWS ZAVRŠI INSTALACIJU DOCKER-A I APACHE-A (Rješava race condition!)
 Write-Host "Čekam da AWS završi instalaciju Dockera, Apache-a i GitLab Runnera (ovo može trajati 2-3 minute)..." -ForegroundColor Yellow
 while ($true) {
     try {
@@ -45,6 +45,7 @@ tar -czf app.tar.gz --exclude='terraform' --exclude='.git' --exclude='node_modul
 Write-Host "Kopiram arhivu i ključeve na server..." -ForegroundColor Cyan
 scp -o StrictHostKeyChecking=no -i ./armprojekat_ec2_access_key.pem .\app.tar.gz ubuntu@${public_ip}:/home/ubuntu/
 scp -o StrictHostKeyChecking=no -i ./armprojekat_ec2_access_key.pem -r ./ssl ubuntu@${public_ip}:/home/ubuntu/
+# Kopiramo ključ na javni server kako biste sa njega mogli SSH-ovati na privatni server baze
 scp -o StrictHostKeyChecking=no -i ./armprojekat_ec2_access_key.pem ./armprojekat_ec2_access_key.pem ubuntu@${public_ip}:/home/ubuntu/
 
 Remove-Item .\app.tar.gz -Force
@@ -52,6 +53,7 @@ Remove-Item .\app.tar.gz -Force
 # 6. Inicijalizacija aplikacije na serveru (Sada kada su i Docker i /opt/app 100% spremni!)
 Write-Host "Pokrećem aplikaciju i konfiguraciju na serveru..." -ForegroundColor Green
 ssh -o StrictHostKeyChecking=no -i ./armprojekat_ec2_access_key.pem ubuntu@${public_ip} "
+  sudo mkdir -p /opt/app &&
   sudo tar -xzf /home/ubuntu/app.tar.gz -C /opt/app/ &&
   sudo chown -R gitlab-runner:gitlab-runner /opt/app &&
   sudo chmod -R 775 /opt/app &&
