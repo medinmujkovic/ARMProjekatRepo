@@ -21,10 +21,8 @@ deploy_to_ec2:
     # 4. Pokrećemo Docker Compose deploy skriptu
     - sudo /opt/deploy.sh
     
-    # 5. Primjenjujemo Apache konfiguraciju i POPRAVLJAMO domenu
+    # 5. Primjenjujemo Apache konfiguraciju
     - sudo cp /opt/app/www.conf /etc/apache2/sites-available/www.conf
-    - sudo sed -i "s/DOMAIN_PLACEHOLDER/local.arm.com/g" /etc/apache2/sites-available/www.conf
-
     - sudo a2ensite www.conf
     - sudo a2dissite 000-default.conf
     
