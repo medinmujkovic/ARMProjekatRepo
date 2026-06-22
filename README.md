@@ -13,7 +13,7 @@ Write in terminal:
 
 ---
 
-## 🏗 System Architecture
+## System Architecture
 
 The system is divided into two main components within the AWS VPC:
 
@@ -30,7 +30,7 @@ The system is divided into two main components within the AWS VPC:
 
 ---
 
-## 📂 Configuration File Structure
+## Configuration File Structure
 
 ### 1. Apache Configuration (`www.conf`)
 Configured to automatically redirect to HTTPS and proxy traffic to the Node.js/external application:
@@ -56,3 +56,23 @@ Configured to automatically redirect to HTTPS and proxy traffic to the Node.js/e
     ProxyPass / [http://127.0.0.1:3000/](http://127.0.0.1:3000/)
     ProxyPassReverse / [http://127.0.0.1:3000/](http://127.0.0.1:3000/)
 </VirtualHost>
+
+### 2. Multi-Container Orchestration (docker-compose.yml)
+Where to check it: Located in the root directory of your application project source code, and deployed to /opt/app/docker-compose.yml on the live App Server.
+
+### What it configures: It defines the multi-container environment on the App Server. It manages the app container dependencies and implements a wait-for-db container image (using netcat loops) to ensure the web application doesn't try to boot until the isolated MySQL port on the private instance is alive.
+
+### 3. Application Environment (Dockerfile)
+Where to check it: Located in the root directory of your application source code alongside the package files.
+
+What it configures: It contains the blueprinted steps to build your custom application container image. It specifies the base runtime environment (e.g., Node, Python, or .NET), copies your source files, installs the production dependencies, exposes port 3000, and sets the default execution command.
+
+### 4. Application Server Provisioning Script (User Data)
+Where to check it: Embedded inside your Terraform EC2 configuration files under the user_data argument for the public app server resource.
+
+What it configures: Runs once at instance creation to install Docker, Docker Compose, Apache, and the GitLab Runner. It handles the initial SSL certificate generation, configures passwordless sudo for the runner, creates system environments, and outputs the deployment script to /opt/deploy.sh.
+
+### 5. Database Server Provisioning Script (User Data)
+Where to check it: Embedded inside your Terraform EC2 configuration files under the user_data argument for the private database instance resource.
+
+What it configures: Executes on the private instance setup. It forces the system to wait until the NAT Gateway provides internet access, updates system packages, installs the bare Docker engine, and runs the official MySQL 8.0 image with strict environment variables and native password plugins.
