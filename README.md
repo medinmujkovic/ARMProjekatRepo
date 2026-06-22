@@ -8,8 +8,8 @@ The entire process of setting up the infrastructure, waiting for server configur
 
 1. Add AWS credentials to your local machine
 Write in terminal:
-2. cd terraform
-3. ./deploy.ps1
+2. ```cd terraform```
+3. ```./deploy.ps1```
 
 ---
 
@@ -56,6 +56,7 @@ Configured to automatically redirect to HTTPS and proxy traffic to the Node.js/e
     ProxyPass / [http://127.0.0.1:3000/](http://127.0.0.1:3000/)
     ProxyPassReverse / [http://127.0.0.1:3000/](http://127.0.0.1:3000/)
 </VirtualHost>
+```
 
 ### 2. Multi-Container Orchestration (docker-compose.yml)
 Where to check it: Located in the root directory of your application project source code, and deployed to /opt/app/docker-compose.yml on the live App Server.
