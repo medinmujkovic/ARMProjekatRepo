@@ -9,10 +9,10 @@ The entire process of setting up the infrastructure, waiting for server configur
 ## Running the Application:
 
 ### 1. Local Network Initialization
-* [cite_start]Configure the local network architecture in VirtualBox using the NAT Network mode[cite: 7, 17, 21].
-* [cite_start]Disable the built-in DHCP service within the VirtualBox NAT Network management settings.
-* [cite_start]Boot the Windows Server virtual machine to activate domain controller services, dynamic address assignment, and name resolutions[cite: 24, 26, 27].
-* [cite_start]Start Windows Client 1 and Windows Client 2 workstations to dynamically lease configuration values from the server[cite: 11, 16, 26, 33].
+* Configure the local network architecture in VirtualBox using the NAT Network mode[cite: 7, 17, 21].
+* Disable the built-in DHCP service within the VirtualBox NAT Network management settings.
+* Boot the Windows Server virtual machine to activate domain controller services, dynamic address assignment, and name resolutions[cite: 24, 26, 27].
+* Start Windows Client 1 and Windows Client 2 workstations to dynamically lease configuration values from the server[cite: 11, 16, 26, 33].
 
 ### 2. AWS Cloud Infrastructure Deployment
 * Configure valid AWS CLI authorization credentials on your local administrative machine.
