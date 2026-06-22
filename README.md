@@ -1,80 +1,58 @@
-# Sudski informacioni sistem
+# ARM Project - Automated Deployment System
 
-Jednostavna ASP.NET Core aplikacija za sigurnu obradu sudskih predmeta i digitalnih dokaza.
+This project represents a complete infrastructure and application solution based on the **AWS (Amazon Web Services)** platform. The system uses **Terraform** for infrastructure provisioning, **Docker** for application and database containerization, **Apache** as a reverse proxy with SSL encryption, and **GitLab Runner** for the CI/CD pipeline.
 
-## Tehnologije
+The entire process of setting up the infrastructure, waiting for server configuration, packaging, and sending the code is fully automated through a PowerShell script that eliminates *race condition* issues.
 
-- C# / ASP.NET Core MVC
-- HTML, CSS i JavaScript
-- SQLite baza podataka
-- Lokalni folder za čuvanje uploadovanih fajlova
-- SHA-256 provjera integriteta digitalnih dokaza
+## Running the Application:
 
-## Funkcionalnosti
+1. Add AWS credentials to your local machine
+Write in terminal:
+2. cd terraform
+3. ./deploy.ps1
 
-- Prijava korisnika u sistem
-- Prikaz dashboarda prema ulozi
-- Kreiranje sudskog predmeta, samo glavni inspektor
-- Pregled sudskih predmeta, sve uloge
-- Dodavanje digitalnih dokaza, glavni inspektor i inspektor
-- Pregled digitalnih dokaza, sve uloge
-- SHA-256 provjera fajla, sve uloge
-- Ograničenje neuspješnih pokušaja prijave
-- Lozinke se čuvaju hashirane, ne u otvorenom obliku
-- Upload ograničen na dozvoljene tipove fajlova
+---
 
-## Demo korisnici
+## 🏗 System Architecture
 
-| Uloga | Korisničko ime | Lozinka |
-|---|---|---|
-| Glavni inspektor | glavni | Glavni123! |
-| Inspektor | inspektor | Inspektor123! |
-| Sudija | sudija | Sudija123! |
+The system is divided into two main components within the AWS VPC:
 
-## Pokretanje
+1. **Public Instance (App Server - EC2):**
+   * **Apache Web Server:** Serves as a Reverse Proxy that redirects traffic from port `80` (HTTP) to `443` (HTTPS), and then proxies requests to local port `3000`.
+   * **Docker Container (`arm-app`):** Runs the application on port `3000`.
+   * **GitLab Runner:** Shell executor prepared for automated CI/CD deployment via `/opt/deploy.sh`.
+   * **SSL:** Self-signed certificate for the `local.arm.com` domain.
 
-U folderu projekta pokrenuti:
+2. **Private Instance (Database Server - EC2):**
+   * Isolated within a private subnet (Access is only possible from the application subnet).
+   * Connects to the internet via a **NAT Gateway** for package installations.
+   * Runs **MySQL 8.0** within a Docker container (`arm-db-container`) on port `3306`.
 
-```bash
-dotnet restore
-dotnet run
-```
+---
 
-Zatim otvoriti adresu koju terminal prikaže, najčešće:
+## 📂 Configuration File Structure
 
-```text
-https://localhost:5001
-```
+### 1. Apache Configuration (`www.conf`)
+Configured to automatically redirect to HTTPS and proxy traffic to the Node.js/external application:
 
-Ako browser prijavi razvojni HTTPS certifikat, može se pokrenuti:
+```apache
+<VirtualHost *:80>
+    ServerName local.arm.com
+    ServerAlias [www.local.arm.com](https://www.local.arm.com)
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+</VirtualHost>
 
-```bash
-dotnet dev-certs https --trust
-```
+<VirtualHost *:443>
+    ServerName local.arm.com
+    ServerAlias [www.local.arm.com](https://www.local.arm.com)
 
-## Baza i fajlovi
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/[www.local.arm.com](https://www.local.arm.com).pem
+    SSLCertificateKeyFile /etc/ssl/private/[www.local.arm.com](https://www.local.arm.com).key
 
-- SQLite baza se automatski kreira u folderu `App_Data/court_system.db`.
-- Digitalni dokazi se čuvaju u folderu `UploadedEvidence`.
-- Aplikacija automatski dodaje tri demo korisnika i dva primjer sudska predmeta prilikom prvog pokretanja.
-
-
-## HTTPS-only napomena
-
-Aplikacija je podešena da sluša samo HTTPS endpoint `https://localhost:5001`.
-HTTP endpoint je uklonjen kako se login forma ne bi mogla servirati preko nezaštićenog
-HTTP saobraćaja ili lokalnog MITM proxyja. Session i anti-forgery cookie postavke ostaju
-`Secure`, `HttpOnly` i `SameSite=Strict`.
-
-Pokretanje:
-
-```powershell
-dotnet dev-certs https --trust
-dotnet run
-```
-
-Otvoriti isključivo:
-
-```text
-https://localhost:5001
-```
+    ProxyPreserveHost On
+    ProxyPass / [http://127.0.0.1:3000/](http://127.0.0.1:3000/)
+    ProxyPassReverse / [http://127.0.0.1:3000/](http://127.0.0.1:3000/)
+</VirtualHost>
